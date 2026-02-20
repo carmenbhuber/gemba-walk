@@ -5,1202 +5,503 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GembaWalk</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --bg: #f4f3ef;
-  --surface: #ffffff;
-  --surface2: #eeede9;
-  --border: #dddcd7;
-  --text: #1a1917;
-  --text-muted: #7a7870;
-  --text-dim: #a09e98;
-  --accent: #1a4d3e;
-  --accent-light: #e8f0ed;
-  --accent2: #c84b1f;
-  --accent2-light: #fdf0eb;
-  --gold: #b8860b;
-  --gold-light: #fdf8e8;
-  --ws-color: #1a6e3c;
-  --ws-bg: #e8f5ee;
-  --nws-color: #c84b1f;
-  --nws-bg: #fdf0eb;
-  --nnotw-color: #7a5c00;
-  --nnotw-bg: #fef9e7;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#f0ede8;--surface:#fff;--surface2:#e8e4de;--border:#d4cfc8;
+  --text:#1a1917;--muted:#7a7670;--dim:#a09b95;
+  --green:#1a5c3e;--gbg:#e6f2ec;--gbrd:rgba(26,92,62,.25);
+  --brown:#7a5230;--bbg:#f2ece4;--bbrd:rgba(122,82,48,.25);
+  --red:#c0392b;--rbg:#fbeae8;--gold:#8a6800;--goldbg:#fdf5e0;
+  --r:14px;--rs:9px;
 }
+html,body{height:100%;width:100%;overflow:hidden;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* SCREENS */
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;overflow:hidden;}
+.screen.off{transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen.left{transform:translateX(-100%);opacity:0;pointer-events:none;}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'IBM Plex Sans', sans-serif;
-  min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  padding-bottom: 72px;
-  font-size: 15px;
-}
+/* SCREEN 1 */
+#s1{align-items:center;justify-content:center;padding:32px 24px;gap:20px;}
+.logo{text-align:center;}
+.logo h1{font-size:34px;font-weight:700;letter-spacing:-.02em;color:var(--green);}
+.logo h1 span{color:var(--text);font-weight:300;}
+.logo p{font-size:13px;color:var(--muted);margin-top:3px;}
+.flabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:5px;}
+input[type=text]{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:15px;padding:11px 13px;outline:none;transition:border-color .15s;}
+input[type=text]:focus{border-color:var(--green);}
+.tcards{width:100%;display:flex;flex-direction:column;gap:10px;}
+.tcard{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;}
+.tcard:active{transform:scale(.98);}
+.tcard.sa{border-color:var(--green);background:var(--gbg);}
+.tcard.sb{border-color:var(--brown);background:var(--bbg);}
+.tcard .em{font-size:30px;flex-shrink:0;}
+.tcard .tt h3{font-size:16px;font-weight:600;}
+.tcard .tt p{font-size:12px;color:var(--muted);margin-top:2px;}
+.tcard.sa .tt h3{color:var(--green);}
+.tcard.sb .tt h3{color:var(--brown);}
+.sbtn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .15s;opacity:.4;pointer-events:none;}
+.sbtn.on{opacity:1;pointer-events:all;}
+.sbtn:active{transform:scale(.98);}
 
-/* ===== SCREENS ===== */
-.screen { display: none; animation: fadeIn 0.2s ease; }
-.screen.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+/* SCREEN 2 */
+#s2{display:flex;flex-direction:column;}
+.abar{background:var(--surface);border-bottom:1.5px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.abar-l h2{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--green);}
+.abar-l .meta{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.abar-r{display:flex;gap:7px;align-items:center;}
+.pill{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;}
+.pa{background:var(--gbg);color:var(--green);border:1px solid var(--gbrd);}
+.pb{background:var(--bbg);color:var(--brown);border:1px solid var(--bbrd);}
+.endbtn{font-size:11px;font-weight:500;padding:5px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--text);}
 
-/* ===== START SCREEN ===== */
-#startScreen {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px 48px;
-  gap: 28px;
-}
-#startScreen.active { display: flex; }
+.tcontent{flex:1;overflow:hidden;position:relative;}
+.tpane{position:absolute;inset:0;overflow-y:auto;visibility:hidden;opacity:0;pointer-events:none;-webkit-overflow-scrolling:touch;background:var(--bg);}
+.tpane.on{visibility:visible;opacity:1;pointer-events:all;}
 
-.logo-wrap { text-align: center; }
-.logo-wrap h1 {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-.logo-wrap h1 span { color: var(--text); font-weight: 300; }
-.logo-wrap p { color: var(--text-muted); font-size: 14px; }
+.bnav{background:var(--surface);border-top:1.5px solid var(--border);display:flex;flex-shrink:0;}
+.nbtn{flex:1;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);transition:color .15s;}
+.nbtn .ni{font-size:20px;}
+.nbtn.on{color:var(--green);}
 
-.type-grid { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+/* ERFASSUNG */
+#pe{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:9px 32px 9px 11px;outline:none;appearance:none;cursor:pointer;transition:border-color .15s;}
+select:focus{border-color:var(--green);}
+.sw{position:relative;}
+.sa2{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:11px;}
+textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;padding:8px 11px;outline:none;resize:none;transition:border-color .15s;line-height:1.4;}
+textarea:focus{border-color:var(--green);}
+.trow{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;}
+.tval{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:500;color:var(--text);transition:color .2s;}
+.tval.run{color:var(--green);}
+.tstat{font-size:10px;color:var(--muted);margin-top:1px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:none;animation:blink 1.2s infinite;}
+.dot.on{display:inline-block;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.tbtn{padding:9px 20px;border:none;border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.tbtn:active{transform:scale(.96);}
+.bstart{background:var(--green);color:#fff;}
+.bstop{background:var(--red);color:#fff;}
+.tgs{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .12s;white-space:nowrap;}
+.tag:active{transform:scale(.95);}
+.ws{background:var(--gbg);border-color:var(--green);color:var(--green);font-weight:600;}
+.nws{background:var(--rbg);border-color:var(--red);color:var(--red);font-weight:600;}
+.nn{background:var(--goldbg);border-color:var(--gold);color:var(--gold);font-weight:600;}
+.vj{background:var(--gbg);border-color:var(--green);color:var(--green);font-weight:600;}
+.vn{background:var(--surface2);border-color:var(--muted);color:var(--text);font-weight:600;}
+.bet{background:var(--surface2);border-color:var(--text);color:var(--text);font-weight:600;}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:11px;color:var(--muted);cursor:pointer;}
+.chip:active{background:var(--gbg);color:var(--green);}
+.div{border:none;border-top:1.5px solid var(--border);}
 
-.type-card {
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.18s;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: var(--shadow);
-}
-.type-card:active { transform: scale(0.98); }
-.type-card.arzt:hover, .type-card.arzt:active { border-color: var(--accent); background: var(--accent-light); }
-.type-card.admin:hover, .type-card.admin:active { border-color: var(--accent2); background: var(--accent2-light); }
-.type-card .type-emoji { font-size: 36px; flex-shrink: 0; }
-.type-card .type-text h3 { font-size: 17px; font-weight: 600; margin-bottom: 2px; }
-.type-card .type-text p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
-.type-card.arzt .type-text h3 { color: var(--accent); }
-.type-card.admin .type-text h3 { color: var(--accent2); }
+/* EINTRAEGE */
+#pin{padding:10px 12px;}
+.lhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.lcnt{font-size:12px;color:var(--muted);}
+.bsm{font-size:11px;padding:5px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;color:var(--text);}
+.elist{display:flex;flex-direction:column;gap:7px;}
+.ecard{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;}
+.ebar{width:3px;border-radius:3px;align-self:stretch;min-height:32px;flex-shrink:0;}
+.bws{background:var(--green);}.bnws{background:var(--red);}.bnn{background:var(--gold);}.bx{background:var(--border);}
+.ebody{flex:1;min-width:0;}
+.etask{font-weight:600;font-size:13px;}
+.epat{font-size:11px;color:var(--muted);margin-top:1px;}
+.etags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.mt{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:.03em;}
+.mws{background:var(--gbg);color:var(--green);}
+.mnws{background:var(--rbg);color:var(--red);}
+.mnn{background:var(--goldbg);color:var(--gold);}
+.mv{background:var(--gbg);color:var(--green);}
+.mnv{background:var(--surface2);color:var(--muted);}
+.enote{font-size:11px;color:var(--dim);margin-top:3px;font-style:italic;}
+.er{text-align:right;flex-shrink:0;}
+.edur{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--green);}
+.etime{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.edel{background:none;border:none;color:var(--dim);font-size:14px;cursor:pointer;display:block;margin-top:4px;}
+.edel:active{color:var(--red);}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.eico{font-size:36px;margin-bottom:8px;}
 
-/* Observer name input on start */
-.observer-field { width: 100%; }
-.observer-field label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); display: block; margin-bottom: 6px; }
+/* MONITORING */
+#pm{padding:10px 12px;}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.kbox{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center;}
+.kval{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;color:var(--green);}
+.klbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px;}
+.stitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 7px;padding-bottom:5px;border-bottom:1.5px solid var(--border);}
+.togrow{display:flex;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:10px;}
+.tog{flex:1;padding:6px 4px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:var(--muted);border:none;background:none;font-family:'IBM Plex Sans',sans-serif;transition:all .15s;}
+.tog.on{background:var(--surface);color:var(--text);font-weight:600;}
+.bitem{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bname{font-size:12px;width:120px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btrack{flex:1;background:var(--surface2);border-radius:3px;height:7px;overflow:hidden;}
+.bfill{height:100%;border-radius:3px;transition:width .4s;}
+.fg{background:var(--green);}.fr{background:var(--red);}.fgo{background:var(--gold);}
+.bval{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);width:38px;text-align:right;}
+.ebox{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);padding:12px;margin-top:4px;}
+.einfo{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+.bexp{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;}
+.bemail{width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.hint{background:var(--gbg);border:1px solid var(--gbrd);border-radius:var(--rs);padding:10px;font-size:11px;color:var(--green);line-height:1.5;margin-top:8px;}
+.hint strong{display:block;margin-bottom:2px;font-size:12px;}
 
-/* ===== HEADER ===== */
-.app-header {
-  background: var(--surface);
-  border-bottom: 2px solid var(--border);
-  padding: 12px 16px;
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.header-left h2 { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent); }
-.header-left .header-meta { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; margin-top: 1px; }
-.header-right { display: flex; gap: 8px; align-items: center; }
-
-.type-pill {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.pill-arzt { background: var(--accent-light); color: var(--accent); border: 1px solid rgba(26,77,62,0.2); }
-.pill-admin { background: var(--accent2-light); color: var(--accent2); border: 1px solid rgba(200,75,31,0.2); }
-
-/* ===== BOTTOM TABS ===== */
-.bottom-tabs {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  background: var(--surface);
-  border-top: 2px solid var(--border);
-  display: flex; z-index: 300;
-}
-.tab-btn {
-  flex: 1; padding: 9px 0 11px;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  cursor: pointer; color: var(--text-muted);
-  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
-  border: none; background: none; font-family: 'IBM Plex Sans', sans-serif;
-  transition: color 0.15s;
-}
-.tab-btn .tab-icon { font-size: 21px; }
-.tab-btn.active { color: var(--accent); }
-
-/* ===== SHARED COMPONENTS ===== */
-.section-pad { padding: 16px; }
-
-.field-label {
-  font-size: 11px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text-muted); margin-bottom: 5px;
-}
-
-input[type="text"], select, textarea {
-  width: 100%;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 15px;
-  padding: 10px 13px;
-  outline: none;
-  transition: border-color 0.15s;
-  appearance: none;
-  -webkit-appearance: none;
-}
-input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--accent); }
-select { padding-right: 36px; cursor: pointer; }
-.select-wrap { position: relative; }
-.select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); font-size: 12px; }
-textarea { resize: none; line-height: 1.4; }
-
-.btn {
-  border: none; border-radius: var(--radius-sm);
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600; font-size: 15px;
-  padding: 12px 20px; cursor: pointer;
-  transition: all 0.15s; width: 100%;
-  letter-spacing: 0.01em;
-}
-.btn:active { transform: scale(0.98); opacity: 0.9; }
-.btn-primary { background: var(--accent); color: white; }
-.btn-danger { background: var(--accent2); color: white; }
-.btn-ghost { background: var(--surface2); border: 1.5px solid var(--border); color: var(--text); }
-.btn-sm { font-size: 13px; padding: 8px 14px; width: auto; }
-.btn-reset { background: var(--surface); border: 1.5px solid var(--border); color: var(--text-muted); font-size: 12px; padding: 6px 11px; border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
-.btn-reset:active { background: var(--surface2); }
-
-.row-2 { display: flex; gap: 10px; }
-.row-2 > * { flex: 1; }
-
-.spacer { margin-bottom: 12px; }
-.spacer-sm { margin-bottom: 8px; }
-
-/* ===== TIMER CARD ===== */
-.timer-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
-
-.timer-display {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 52px;
-  font-weight: 600;
-  text-align: center;
-  color: var(--text);
-  line-height: 1;
-  padding: 8px 0;
-  letter-spacing: 0.02em;
-  transition: color 0.3s;
-}
-.timer-display.running { color: var(--accent); }
-.timer-display.stopped { color: var(--text-muted); }
-
-.status-row {
-  display: flex; align-items: center; justify-content: center;
-  gap: 6px; font-size: 12px; color: var(--text-muted);
-  margin-bottom: 10px; min-height: 18px;
-}
-.pulse-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent2); display: none;
-  animation: blink 1.2s ease-in-out infinite;
-}
-.pulse-dot.visible { display: inline-block; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
-/* ===== TAGS: Tätigkeitstyp & Verrechnung ===== */
-.tag-group { display: flex; flex-wrap: wrap; gap: 7px; }
-.tag {
-  padding: 6px 13px; border-radius: 20px;
-  font-size: 13px; font-weight: 500; cursor: pointer;
-  border: 1.5px solid var(--border); background: var(--surface);
-  color: var(--text-muted); transition: all 0.12s;
-  white-space: nowrap;
-}
-.tag:active { transform: scale(0.96); }
-.tag.selected-ws { background: var(--ws-bg); border-color: var(--ws-color); color: var(--ws-color); font-weight: 600; }
-.tag.selected-nws { background: var(--nws-bg); border-color: var(--nws-color); color: var(--nws-color); font-weight: 600; }
-.tag.selected-nnotw { background: var(--nnotw-bg); border-color: var(--nnotw-color); color: var(--nnotw-color); font-weight: 600; }
-.tag.selected-verr { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-.tag.selected-nverr { background: var(--surface2); border-color: var(--text-muted); color: var(--text); font-weight: 600; }
-
-/* ===== QUICK PATIENT CHIPS ===== */
-.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
-.chip {
-  background: var(--surface2); border: 1.5px solid var(--border);
-  border-radius: 20px; padding: 4px 11px;
-  font-size: 12px; color: var(--text-muted); cursor: pointer;
-  transition: all 0.12s; white-space: nowrap;
-}
-.chip:active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-
-/* ===== EINTRÄGE LIST ===== */
-.entry-list { display: flex; flex-direction: column; gap: 8px; }
-.entry-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  display: flex; align-items: flex-start; gap: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-.entry-type-bar {
-  width: 4px; border-radius: 3px; flex-shrink: 0;
-  align-self: stretch; min-height: 36px;
-}
-.bar-ws { background: var(--ws-color); }
-.bar-nws { background: var(--nws-color); }
-.bar-nnotw { background: var(--gold); }
-.bar-none { background: var(--border); }
-
-.entry-body { flex: 1; min-width: 0; }
-.entry-task { font-weight: 600; font-size: 14px; line-height: 1.3; }
-.entry-patient { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-.entry-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-.mini-tag {
-  font-size: 10px; font-weight: 600; padding: 2px 7px;
-  border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em;
-}
-.mt-ws { background: var(--ws-bg); color: var(--ws-color); }
-.mt-nws { background: var(--nws-bg); color: var(--nws-color); }
-.mt-nnotw { background: var(--nnotw-bg); color: var(--nnotw-color); }
-.mt-verr { background: var(--accent-light); color: var(--accent); }
-.mt-nverr { background: var(--surface2); color: var(--text-muted); }
-.entry-note { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-style: italic; line-height: 1.3; }
-
-.entry-right { text-align: right; flex-shrink: 0; }
-.entry-dur {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px; font-weight: 600; color: var(--accent);
-}
-.entry-time { font-size: 10px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
-.entry-del { background: none; border: none; color: var(--text-dim); font-size: 16px; cursor: pointer; padding: 2px 0; margin-top: 6px; display: block; }
-.entry-del:active { color: var(--accent2); }
-
-.empty-state { text-align: center; padding: 56px 24px; color: var(--text-muted); }
-.empty-state .ei { font-size: 44px; margin-bottom: 10px; }
-.empty-state p { font-size: 14px; line-height: 1.5; }
-
-/* ===== MONITORING ===== */
-.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
-.stat-box {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px 12px; text-align: center;
-  box-shadow: var(--shadow);
-}
-.stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: var(--accent); }
-.stat-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-top: 3px; }
-
-.section-title {
-  font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin: 18px 0 10px;
-  padding-bottom: 6px;
-  border-bottom: 2px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-}
-
-.toggle-row { display: flex; background: var(--surface2); border-radius: 8px; padding: 3px; margin-bottom: 12px; }
-.toggle-btn {
-  flex: 1; padding: 7px 4px; text-align: center;
-  font-size: 13px; font-weight: 500; cursor: pointer;
-  border-radius: 6px; color: var(--text-muted);
-  transition: all 0.15s; border: none; background: none;
-  font-family: 'IBM Plex Sans', sans-serif;
-}
-.toggle-btn.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-
-.bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-.bar-name { font-size: 13px; width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 9px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-.fill-ws { background: var(--ws-color); }
-.fill-nws { background: var(--nws-color); }
-.fill-nnotw { background: var(--gold); }
-.fill-accent { background: var(--accent); }
-.bar-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted); width: 45px; text-align: right; }
-
-.legend-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-/* ===== EXPORT ===== */
-.export-box {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px;
-  margin-top: 12px; box-shadow: var(--shadow);
-}
-.export-info { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
-.sharepoint-hint {
-  background: var(--accent-light); border: 1px solid rgba(26,77,62,0.2);
-  border-radius: var(--radius-sm); padding: 12px;
-  font-size: 12px; color: var(--accent); line-height: 1.5; margin-top: 10px;
-}
-.sharepoint-hint strong { display: block; margin-bottom: 3px; }
-
-/* ===== TOAST ===== */
-.toast {
-  position: fixed; bottom: 80px; left: 50%;
-  transform: translateX(-50%) translateY(12px);
-  background: var(--text); color: white;
-  padding: 9px 20px; border-radius: 20px;
-  font-size: 13px; font-weight: 500;
-  opacity: 0; transition: all 0.25s; z-index: 500;
-  white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  pointer-events: none;
-}
-.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-hr.divider { border: none; border-top: 1.5px solid var(--border); margin: 12px 0; }
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:500;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
-<!-- ==================== START SCREEN ==================== -->
-<div id="startScreen" class="screen active">
-  <div class="logo-wrap">
+<!-- SCREEN 1 -->
+<div class="screen" id="s1">
+  <div class="logo">
     <h1>Gemba<span>Walk</span></h1>
-    <p>Zeiterfassung & Prozessbeobachtung</p>
+    <p>Zeiterfassung &amp; Prozessbeobachtung</p>
+  </div>
+  <div style="width:100%;">
+    <div class="flabel">Beobachter/in</div>
+    <input type="text" id="obsInput" placeholder="Name eingeben…" autocomplete="off" oninput="chkReady()">
+  </div>
+  <div class="tcards">
+    <div class="tcard" id="cA" onclick="pickGType('arzt')">
+      <div class="em">👨‍⚕️</div>
+      <div class="tt"><h3>Arzt / Pflege</h3><p>Patientenkontakt, KISIM, Dokumentation</p></div>
+    </div>
+    <div class="tcard" id="cB" onclick="pickGType('admin')">
+      <div class="em">🗂️</div>
+      <div class="tt"><h3>Administration</h3><p>Koordination, Berichtswesen, Verwaltung</p></div>
+    </div>
+  </div>
+  <button class="sbtn" id="sBtn" onclick="launch()">Gemba starten →</button>
+</div>
+
+<!-- SCREEN 2 -->
+<div class="screen off" id="s2">
+  <div class="abar">
+    <div class="abar-l">
+      <h2>GEMBA WALK</h2>
+      <div class="meta" id="aMeta"></div>
+    </div>
+    <div class="abar-r">
+      <span class="pill" id="aPill"></span>
+      <button class="endbtn" onclick="endSess()">↩ Ende</button>
+    </div>
   </div>
 
-  <div class="observer-field">
-    <div class="field-label">Beobachter/in</div>
-    <input type="text" id="observerInput" placeholder="Name eingeben..." autocomplete="off">
+  <div class="tcontent">
+    <div class="tpane on" id="pe">
+      <div>
+        <div class="flabel">Aktivität</div>
+        <div class="sw"><select id="tSel"><option value="">– Task wählen –</option></select><div class="sa2">▼</div></div>
+        <div class="chips" id="rTasks"></div>
+      </div>
+      <div>
+        <div class="flabel">Patient / Fall</div>
+        <input type="text" id="pInput" placeholder="Name oder Kürzel…" autocomplete="off">
+        <div class="chips" id="rPats"></div>
+      </div>
+      <div class="trow">
+        <div>
+          <div class="tval" id="tDisp">00:00:00</div>
+          <div class="tstat"><span class="dot" id="dot"></span><span id="tLbl">Bereit</span></div>
+        </div>
+        <button class="tbtn bstart" id="tBtn" onclick="togTimer()">▶ Start</button>
+      </div>
+      <hr class="div">
+      <div>
+        <div class="flabel">Tätigkeitstyp</div>
+        <div class="tgs" id="gTyp">
+          <div class="tag" data-v="wertschöpfend" onclick="pTyp(this)">✅ Wertschöpfend</div>
+          <div class="tag" data-v="nicht wertschöpfend" onclick="pTyp(this)">❌ Nicht wertschöpfend</div>
+          <div class="tag" data-v="notwendig nicht wertschöpfend" onclick="pTyp(this)">⚠️ Notwendig</div>
+        </div>
+      </div>
+      <div>
+        <div class="flabel">Verrechnung</div>
+        <div class="tgs" id="gVerr">
+          <div class="tag" data-v="ja" onclick="pVerr(this)">💰 Verrechenbar</div>
+          <div class="tag" data-v="nein" onclick="pVerr(this)">— Nicht verrechenbar</div>
+        </div>
+      </div>
+      <div id="gBetWrap" style="display:none;">
+        <div class="flabel">Beteiligt</div>
+        <div class="tgs" id="gBet">
+          <div class="tag" data-v="Oberarzt" onclick="pBet(this)">Oberarzt</div>
+          <div class="tag" data-v="Assistenzarzt" onclick="pBet(this)">Assistenzarzt</div>
+          <div class="tag" data-v="Chirurg" onclick="pBet(this)">Chirurg</div>
+          <div class="tag" data-v="Anästhesie" onclick="pBet(this)">Anästhesie</div>
+          <div class="tag" data-v="Pflege" onclick="pBet(this)">Pflege</div>
+          <div class="tag" data-v="Patient" onclick="pBet(this)">Patient</div>
+          <div class="tag" data-v="Therapie" onclick="pBet(this)">Therapie</div>
+          <div class="tag" data-v="Supervision" onclick="pBet(this)">Supervision</div>
+        </div>
+      </div>
+      <div>
+        <div class="flabel">Kommentar (optional)</div>
+        <textarea id="kom" rows="2" placeholder="Beobachtung, Idee, Potenzial…"></textarea>
+      </div>
+    </div>
+
+    <div class="tpane" id="pin">
+      <div class="lhdr">
+        <div class="lcnt"><span id="eCnt">0</span> Einträge</div>
+        <button class="bsm" onclick="clearAll()">🗑 Alle löschen</button>
+      </div>
+      <div class="elist" id="eList"><div class="empty"><div class="eico">⏱️</div><p>Noch keine Einträge.</p></div></div>
+    </div>
+
+    <div class="tpane" id="pm">
+      <div class="kgrid">
+        <div class="kbox"><div class="kval" id="kT">–</div><div class="klbl">Gesamtzeit</div></div>
+        <div class="kbox"><div class="kval" id="kC">–</div><div class="klbl">Einträge</div></div>
+        <div class="kbox"><div class="kval" id="kW">–</div><div class="klbl">Wertschöpfend</div></div>
+        <div class="kbox"><div class="kval" id="kV">–</div><div class="klbl">Verrechenbar</div></div>
+      </div>
+      <div class="togrow" id="mTog">
+        <button class="tog on" onclick="setMon('task',this)">Nach Task</button>
+        <button class="tog" onclick="setMon('patient',this)">Nach Patient</button>
+        <button class="tog" onclick="setMon('type',this)">Tätigkeitstyp</button>
+      </div>
+      <div id="mBars"></div>
+      <div class="stitle">Export</div>
+      <div class="ebox">
+        <div class="einfo">CSV im Screening-Format für Excel &amp; SharePoint.</div>
+        <button class="bexp" onclick="doExport()">📥 CSV + Monitoring herunterladen</button>
+        <button class="bemail" onclick="doEmail()">📧 Bericht an carmen.huber@kispisg.ch</button>
+        <div class="hint"><strong>💡 SharePoint-Tipp</strong>CSV hochladen → Excel öffnen → Pivot-Auswertung.</div>
+      </div>
+    </div>
   </div>
 
-  <div class="type-grid">
-    <div class="type-card arzt" onclick="startSession('arzt')">
-      <div class="type-emoji">👨‍⚕️</div>
-      <div class="type-text">
-        <h3>Arzt / Pflege</h3>
-        <p>Patientenkontakt, KISIM, Dokumentation</p>
-      </div>
-    </div>
-    <div class="type-card admin" onclick="startSession('admin')">
-      <div class="type-emoji">🗂️</div>
-      <div class="type-text">
-        <h3>Administration</h3>
-        <p>Koordination, Berichtswesen, Verwaltung</p>
-      </div>
-    </div>
+  <div class="bnav">
+    <button class="nbtn on" id="n0" onclick="swTab(0)"><span class="ni">⏱️</span>Erfassung</button>
+    <button class="nbtn" id="n1" onclick="swTab(1)"><span class="ni">📋</span>Einträge</button>
+    <button class="nbtn" id="n2" onclick="swTab(2)"><span class="ni">📊</span>Monitoring</button>
   </div>
 </div>
 
-<!-- ==================== APP WRAPPER ==================== -->
-<div id="appWrapper" style="display:none;">
-
-  <!-- HEADER -->
-  <div class="app-header">
-    <div class="header-left">
-      <h2>GEMBA WALK</h2>
-      <div class="header-meta" id="headerMeta">–</div>
-    </div>
-    <div class="header-right">
-      <span class="type-pill" id="typePill"></span>
-      <button class="btn-reset" onclick="confirmReset()">↩ Ende</button>
-    </div>
-  </div>
-
-  <!-- ====== TAB: ERFASSUNG ====== -->
-  <div id="tabErfassung" class="screen active">
-    <div class="section-pad">
-
-      <!-- Task -->
-      <div class="spacer">
-        <div class="field-label">Aktivität / Prozessschritt</div>
-        <div class="select-wrap">
-          <select id="taskSelect">
-            <option value="">– Task wählen –</option>
-          </select>
-          <div class="select-arrow">▼</div>
-        </div>
-        <div class="chip-row" id="recentTasks"></div>
-      </div>
-
-      <!-- Patient -->
-      <div class="spacer">
-        <div class="field-label">Patient / Fall</div>
-        <input type="text" id="patientInput" placeholder="Patientenname oder Kürzel…" autocomplete="off">
-        <div class="chip-row" id="recentPatients"></div>
-      </div>
-
-      <!-- Timer -->
-      <div class="timer-card spacer">
-        <div class="status-row">
-          <span class="pulse-dot" id="pulseDot"></span>
-          <span id="timerStatus">Bereit</span>
-        </div>
-        <div class="timer-display stopped" id="timerDisplay">00:00:00</div>
-        <div id="timerBtns" style="margin-top:10px;"></div>
-      </div>
-
-      <hr class="divider">
-
-      <!-- Tätigkeitstyp -->
-      <div class="spacer">
-        <div class="field-label">Tätigkeitstyp</div>
-        <div class="tag-group" id="typeTagGroup">
-          <div class="tag" data-val="wertschöpfend" onclick="selectType(this)">✅ Wertschöpfend</div>
-          <div class="tag" data-val="nicht wertschöpfend" onclick="selectType(this)">❌ Nicht wertschöpfend</div>
-          <div class="tag" data-val="notwendig nicht wertschöpfend" onclick="selectType(this)">⚠️ Notwendig, aber nicht wertschöpfend</div>
-        </div>
-      </div>
-
-      <!-- Verrechnung -->
-      <div class="spacer">
-        <div class="field-label">Verrechnung</div>
-        <div class="tag-group" id="verrTagGroup">
-          <div class="tag" data-val="ja" onclick="selectVerr(this)">💰 Verrechenbar</div>
-          <div class="tag" data-val="nein" onclick="selectVerr(this)">— Nicht verrechenbar</div>
-        </div>
-      </div>
-
-      <!-- Beteiligt (Arzt-Modus) -->
-      <div class="spacer" id="beteiligtRow" style="display:none;">
-        <div class="field-label">Beteiligt</div>
-        <div class="tag-group" id="beteiligtGroup">
-          <div class="tag" data-val="Oberarzt" onclick="toggleBeteiligt(this)">🩺 Oberarzt</div>
-          <div class="tag" data-val="Assistenzarzt" onclick="toggleBeteiligt(this)">🩺 Assistenzarzt</div>
-          <div class="tag" data-val="Chirurg" onclick="toggleBeteiligt(this)">🔪 Chirurg</div>
-          <div class="tag" data-val="Anästhesie" onclick="toggleBeteiligt(this)">💉 Anästhesie</div>
-          <div class="tag" data-val="Pflege" onclick="toggleBeteiligt(this)">💊 Pflege</div>
-          <div class="tag" data-val="Patient" onclick="toggleBeteiligt(this)">🧑 Patient</div>
-          <div class="tag" data-val="Therapie" onclick="toggleBeteiligt(this)">🏃 Therapie</div>
-          <div class="tag" data-val="Supervision" onclick="toggleBeteiligt(this)">👁️ Supervision</div>
-        </div>
-      </div>
-
-      <!-- Kommentar -->
-      <div class="spacer">
-        <div class="field-label">Kommentar (optional)</div>
-        <textarea id="kommentarInput" rows="2" placeholder="Beobachtung, Idee, Potenzial…"></textarea>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ====== TAB: EINTRÄGE ====== -->
-  <div id="tabEintraege" class="screen">
-    <div class="section-pad">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-size:13px;color:var(--text-muted);"><span id="entryCount">0</span> Einträge</div>
-        <button class="btn btn-sm btn-ghost" onclick="clearAllEntries()">🗑 Alle löschen</button>
-      </div>
-      <div class="entry-list" id="entryList">
-        <div class="empty-state">
-          <div class="ei">⏱️</div>
-          <p>Noch keine Einträge.<br>Starte auf dem Erfassungs-Tab.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====== TAB: MONITORING ====== -->
-  <div id="tabMonitoring" class="screen">
-    <div class="section-pad">
-
-      <!-- KPI Boxes -->
-      <div class="stats-row" id="kpiRow">
-        <div class="stat-box"><div class="stat-val" id="kpiTotal">–</div><div class="stat-lbl">Gesamtzeit</div></div>
-        <div class="stat-box"><div class="stat-val" id="kpiCount">–</div><div class="stat-lbl">Einträge</div></div>
-        <div class="stat-box"><div class="stat-val" id="kpiWS">–</div><div class="stat-lbl">Wertschöpfend</div></div>
-        <div class="stat-box"><div class="stat-val" id="kpiVerr">–</div><div class="stat-lbl">Verrechenbar</div></div>
-      </div>
-
-      <!-- Legend -->
-      <div class="legend-row" style="margin-top:14px;">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--ws-color)"></div>Wertschöpfend</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--nws-color)"></div>Nicht wertschöpfend</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Notwendig n.w.</div>
-      </div>
-
-      <!-- Toggle -->
-      <div class="toggle-row" id="monToggle">
-        <button class="toggle-btn active" onclick="setMonView('task', this)">Nach Task</button>
-        <button class="toggle-btn" onclick="setMonView('patient', this)">Nach Patient</button>
-        <button class="toggle-btn" onclick="setMonView('type', this)">Tätigkeitstyp</button>
-      </div>
-
-      <div id="monContent"></div>
-
-      <!-- Export -->
-      <div class="section-title">Export</div>
-      <div class="export-box">
-        <div class="export-info">CSV-Export für Excel / SharePoint. Alle Felder wie im Original-Screening-Sheet (Zeit, Aktivität, Tätigkeitstyp, Verrechnung, Patient, Kommentar).</div>
-        <button class="btn btn-primary" onclick="exportCSV()">📥 &nbsp;CSV herunterladen</button>
-        <div class="sharepoint-hint">
-          <strong>💡 SharePoint-Tipp</strong>
-          CSV herunterladen → In SharePoint-Bibliothek hochladen → Mit Excel öffnen → Pivot-Auswertung möglich. Für Mehrbenutzer-Betrieb: QR-Code auf diese HTML-Datei erstellen und Datei in SharePoint ablegen.
-        </div>
-        <button class="btn btn-ghost" style="margin-top:10px;" onclick="sendReportEmail()">📧 &nbsp;Bericht an carmen.huber@kispisg.ch senden</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- BOTTOM TABS -->
-  <div class="bottom-tabs">
-    <button class="tab-btn active" id="tab0" onclick="switchTab(0)">
-      <span class="tab-icon">⏱️</span>Erfassung
-    </button>
-    <button class="tab-btn" id="tab1" onclick="switchTab(1)">
-      <span class="tab-icon">📋</span>Einträge
-    </button>
-    <button class="tab-btn" id="tab2" onclick="switchTab(2)">
-      <span class="tab-icon">📊</span>Monitoring
-    </button>
-  </div>
-
-</div><!-- end appWrapper -->
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ===========================
-// DATA & STATE
-// ===========================
-const TASKS = {
-  arzt: [
-    'Patientenanmeldung',
-    'Arztrapport / Übergabe',
-    'KISIM lesen',
-    'Fallvorbereitung / Informationssuche',
-    'Besprechung Patient',
-    'Patientenbesuch / Untersuchung',
-    'Teaching / Supervision',
-    'Labor / Bildgebung',
-    'Interprofessionelle Abstimmung',
-    'Telefonat intern',
-    'Telefonat extern',
-    'KISIM Dokumentation',
-    'Medi-Erfassung',
-    'Rezept schreiben',
-    'Leistungserfassung',
-    'Bericht schreiben',
-    'Warten auf Arzt / Pflege',
-    'Warten auf Patient',
-    'Administrative Tätigkeit',
-    'Sonstiges'
-  ],
-  admin: [
-    'Terminkoordination mit Arzt',
-    'Terminkoordination mit Patient',
-    'Terminkoordination externe Partner',
-    'Terminkoordination interne Partner',
-    'Berichtswesen',
-    'E-Mail Bearbeitung',
-    'Telefon intern',
-    'Telefon extern',
-    'Dokumentenablage / Archivierung',
-    'Rechnungsstellung / Codierung',
-    'Informationssuche',
-    'Meeting / Besprechung',
-    'Datenpflege / Systemerfassung',
-    'Warten / Leerlauf',
-    'Sonstiges'
-  ]
+var TASKS={
+  arzt:['Patientenanmeldung','Arztrapport / Übergabe','KISIM lesen','Fallvorbereitung / Informationssuche','Besprechung Patient','Patientenbesuch / Untersuchung','Teaching / Supervision','Labor / Bildgebung','Interprofessionelle Abstimmung','Telefonat intern','Telefonat extern','KISIM Dokumentation','Medi-Erfassung','Rezept schreiben','Leistungserfassung','Bericht schreiben','Warten auf Arzt / Pflege','Warten auf Patient','Administrative Tätigkeit','Sonstiges'],
+  admin:['Terminkoordination mit Arzt','Terminkoordination mit Patient','Terminkoordination externe Partner','Terminkoordination interne Partner','Berichtswesen','E-Mail Bearbeitung','Telefon intern','Telefon extern','Dokumentenablage / Archivierung','Rechnungsstellung / Codierung','Informationssuche','Meeting / Besprechung','Datenpflege / Systemerfassung','Warten / Leerlauf','Sonstiges']
 };
 
-let state = {
-  type: '',          // 'arzt' | 'admin'
-  observer: '',
-  entries: [],
-  timer: { running: false, start: null, elapsed: 0, interval: null },
-  currentBeteiligt: [],
-  selectedType: '',
-  selectedVerr: '',
-  recentPatients: [],
-  recentTasks: [],
-  sessionDate: '',
-  monView: 'task'
-};
+var G={type:'',obs:'',entries:[],timer:{run:false,start:null,ms:0,iv:null},styp:'',sverr:'',sbet:[],rp:[],rt:[],date:'',mon:'task'};
 
-// ===========================
-// SESSION
-// ===========================
-function startSession(type) {
-  state.type = type;
-  state.observer = document.getElementById('observerInput').value.trim() || 'Anonym';
-  state.sessionDate = new Date().toLocaleDateString('de-CH');
-  state.entries = loadEntries(type);
+function pickGType(t){
+  G.type=t;
+  document.getElementById('cA').className='tcard'+(t==='arzt'?' sa':'');
+  document.getElementById('cB').className='tcard'+(t==='admin'?' sb':'');
+  chkReady();
+}
+function chkReady(){
+  var ok=document.getElementById('obsInput').value.trim()&&G.type;
+  document.getElementById('sBtn').className='sbtn'+(ok?' on':'');
+}
+function launch(){
+  G.obs=document.getElementById('obsInput').value.trim()||'Anonym';
+  G.date=new Date().toLocaleDateString('de-CH');
+  G.entries=lsLoad();
+  document.getElementById('aMeta').textContent=G.obs+' · '+G.date;
+  var pill=document.getElementById('aPill');
+  if(G.type==='arzt'){pill.textContent='👨‍⚕️ Arzt/Pflege';pill.className='pill pa';document.getElementById('gBetWrap').style.display='';}
+  else{pill.textContent='🗂️ Admin';pill.className='pill pb';document.getElementById('gBetWrap').style.display='none';}
+  buildSel();renderChips();renderEntries();renderMon();
+  document.getElementById('s1').classList.add('left');
+  document.getElementById('s2').classList.remove('off');
+}
+function endSess(){
+  if(G.entries.length&&!confirm('Session beenden?'))return;
+  stopClean();G.entries=[];G.styp='';G.sverr='';G.sbet=[];G.rp=[];G.rt=[];G.type='';
+  document.getElementById('obsInput').value='';
+  document.getElementById('cA').className='tcard';document.getElementById('cB').className='tcard';
+  document.getElementById('sBtn').className='sbtn';
+  document.getElementById('s2').classList.add('off');document.getElementById('s1').classList.remove('left');
+  swTab(0);
+}
+function lsLoad(){try{return JSON.parse(localStorage.getItem('gw_'+G.type)||'[]');}catch(e){return[];}}
+function lsSave(){try{localStorage.setItem('gw_'+G.type,JSON.stringify(G.entries));}catch(e){}}
 
-  // Header
-  document.getElementById('headerMeta').textContent =
-    state.observer + ' · ' + state.sessionDate;
-  const pill = document.getElementById('typePill');
-  if (type === 'arzt') {
-    pill.textContent = '👨‍⚕️ Arzt/Pflege';
-    pill.className = 'type-pill pill-arzt';
-    document.getElementById('beteiligtRow').style.display = '';
-  } else {
-    pill.textContent = '🗂️ Admin';
-    pill.className = 'type-pill pill-admin';
-    document.getElementById('beteiligtRow').style.display = 'none';
-  }
-
-  // Populate task dropdown
-  buildTaskDropdown();
-
-  // Show app
-  document.getElementById('startScreen').classList.remove('active');
-  document.getElementById('appWrapper').style.display = 'block';
-
-  renderRecentChips();
-  updateTimerUI();
-  renderEntries();
-  renderMonitoring();
+function buildSel(){
+  var sel=document.getElementById('tSel'),tasks=TASKS[G.type],rec=G.rt.slice(0,5),oth=tasks.filter(function(t){return rec.indexOf(t)<0;});
+  sel.innerHTML='<option value="">– Task wählen –</option>';
+  if(rec.length){var g1=document.createElement('optgroup');g1.label='🕐 Zuletzt verwendet';rec.forEach(function(t){g1.appendChild(new Option(t,t));});sel.appendChild(g1);var g2=document.createElement('optgroup');g2.label='Alle Tasks';oth.forEach(function(t){g2.appendChild(new Option(t,t));});sel.appendChild(g2);}
+  else{tasks.forEach(function(t){sel.appendChild(new Option(t,t));});}
+}
+function renderChips(){
+  var pc=document.getElementById('rPats');pc.innerHTML='';
+  G.rp.slice(0,6).forEach(function(p){var c=document.createElement('div');c.className='chip';c.textContent=p;c.onclick=function(){document.getElementById('pInput').value=p;};pc.appendChild(c);});
+  var tc=document.getElementById('rTasks');tc.innerHTML='';
+  G.rt.slice(0,4).forEach(function(t){var c=document.createElement('div');c.className='chip';c.textContent=t;c.onclick=function(){document.getElementById('tSel').value=t;};tc.appendChild(c);});
 }
 
-function confirmReset() {
-  if (state.entries.length > 0) {
-    if (!confirm('Session beenden? Nicht exportierte Daten gehen verloren.')) return;
-  }
-  stopTimer();
-  state = { ...state, entries: [], timer: { running: false, start: null, elapsed: 0, interval: null },
-    currentBeteiligt: [], selectedType: '', selectedVerr: '', recentPatients: [], recentTasks: [] };
-  document.getElementById('appWrapper').style.display = 'none';
-  document.getElementById('startScreen').classList.add('active');
-  switchTab(0);
+function togTimer(){
+  if(G.timer.run){stopClean();saveEntry();}
+  else{G.timer.run=true;G.timer.start=Date.now();G.timer.iv=setInterval(tick,500);tick();document.getElementById('tBtn').textContent='⏹ Stop';document.getElementById('tBtn').className='tbtn bstop';document.getElementById('dot').classList.add('on');}
 }
-
-function loadEntries(type) {
-  try {
-    const key = 'gemba_entries_' + type;
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch(e) { return []; }
+function tick(){
+  var tot=G.timer.ms+(G.timer.run?Date.now()-G.timer.start:0);
+  var h=Math.floor(tot/3600000),m=Math.floor((tot%3600000)/60000),s=Math.floor((tot%60000)/1000);
+  var p=function(n){return String(n).padStart(2,'0');};
+  document.getElementById('tDisp').textContent=p(h)+':'+p(m)+':'+p(s);
+  document.getElementById('tDisp').className='tval'+(G.timer.run?' run':'');
+  document.getElementById('tLbl').textContent=G.timer.run?(document.getElementById('tSel').value||'Läuft…'):'Gestoppt';
 }
-
-function saveEntries() {
-  try {
-    const key = 'gemba_entries_' + state.type;
-    localStorage.setItem(key, JSON.stringify(state.entries));
-  } catch(e) {}
+function stopClean(){
+  if(G.timer.run){G.timer.ms+=Date.now()-G.timer.start;G.timer.run=false;}
+  clearInterval(G.timer.iv);
+  document.getElementById('tBtn').textContent='▶ Start';document.getElementById('tBtn').className='tbtn bstart';document.getElementById('dot').classList.remove('on');tick();
 }
+function resetTimer(){G.timer={run:false,start:null,ms:0,iv:null};document.getElementById('tDisp').textContent='00:00:00';document.getElementById('tDisp').className='tval';document.getElementById('tLbl').textContent='Bereit';}
 
-function buildTaskDropdown() {
-  const sel = document.getElementById('taskSelect');
-  const tasks = TASKS[state.type];
-  // Reorder: recent first
-  const recent = state.recentTasks.slice(0, 5);
-  const others = tasks.filter(t => !recent.includes(t));
-  const ordered = [...recent, ...others];
-  sel.innerHTML = '<option value="">– Task wählen –</option>';
-  if (recent.length > 0) {
-    const grp1 = document.createElement('optgroup');
-    grp1.label = '🕐 Zuletzt verwendet';
-    recent.forEach(t => { const o = new Option(t, t); grp1.appendChild(o); });
-    sel.appendChild(grp1);
-    const grp2 = document.createElement('optgroup');
-    grp2.label = 'Alle Tasks';
-    others.forEach(t => { const o = new Option(t, t); grp2.appendChild(o); });
-    sel.appendChild(grp2);
-  } else {
-    ordered.forEach(t => { const o = new Option(t, t); sel.appendChild(o); });
-  }
-}
+function pTyp(el){document.querySelectorAll('#gTyp .tag').forEach(function(t){t.className='tag';});G.styp=el.dataset.v;el.classList.add(G.styp==='wertschöpfend'?'ws':G.styp==='nicht wertschöpfend'?'nws':'nn');}
+function pVerr(el){document.querySelectorAll('#gVerr .tag').forEach(function(t){t.className='tag';});G.sverr=el.dataset.v;el.classList.add(el.dataset.v==='ja'?'vj':'vn');}
+function pBet(el){var v=el.dataset.v;if(G.sbet.indexOf(v)>=0){G.sbet=G.sbet.filter(function(x){return x!==v;});el.className='tag';}else{G.sbet.push(v);el.classList.add('bet');}}
 
-// ===========================
-// TIMER
-// ===========================
-function updateTimerUI() {
-  const { running, elapsed } = state.timer;
-  const total = running
-    ? elapsed + (Date.now() - state.timer.start)
-    : elapsed;
-
-  const h = Math.floor(total / 3600000);
-  const m = Math.floor((total % 3600000) / 60000);
-  const s = Math.floor((total % 60000) / 1000);
-  const fmt = n => String(n).padStart(2, '0');
-  document.getElementById('timerDisplay').textContent = `${fmt(h)}:${fmt(m)}:${fmt(s)}`;
-  document.getElementById('timerDisplay').className = 'timer-display ' + (running ? 'running' : 'stopped');
-
-  const dot = document.getElementById('pulseDot');
-  const status = document.getElementById('timerStatus');
-  const task = document.getElementById('taskSelect').value;
-  const patient = document.getElementById('patientInput').value.trim();
-
-  if (running) {
-    dot.classList.add('visible');
-    status.textContent = (task ? task : 'Läuft…') + (patient ? ' · ' + patient : '');
-  } else {
-    dot.classList.remove('visible');
-    status.textContent = total > 0 ? 'Gestoppt' : 'Bereit';
-  }
-
-  const btns = document.getElementById('timerBtns');
-  const saveBtn = document.getElementById('saveBtn');
-  if (!running && elapsed === 0) {
-    btns.innerHTML = `<button class="btn btn-primary" onclick="startTimer()">▶ Start</button>`;
-  } else if (running) {
-    btns.innerHTML = `<button class="btn btn-danger" onclick="stopTimer()">⏹ Stop & Speichern</button>`;
-  } else {
-    btns.innerHTML = `<button class="btn btn-primary" onclick="startTimer()">▶ Start</button>`;
-  }
-}
-
-function startTimer() {
-  state.timer.running = true;
-  state.timer.start = Date.now();
-  state.timer.interval = setInterval(updateTimerUI, 1000);
-  updateTimerUI();
-}
-
-function stopTimer() {
-  if (!state.timer.running) return;
-  state.timer.elapsed += Date.now() - state.timer.start;
-  state.timer.running = false;
-  clearInterval(state.timer.interval);
-  updateTimerUI();
-  // Auto-save entry after stop
-  saveEntry();
-}
-
-function resumeTimer() {
-  state.timer.running = true;
-  state.timer.start = Date.now();
-  state.timer.interval = setInterval(updateTimerUI, 1000);
-  updateTimerUI();
-}
-
-function resetTimer() {
-  clearInterval(state.timer.interval);
-  state.timer = { running: false, start: null, elapsed: 0, interval: null };
-  updateTimerUI();
-}
-
-// ===========================
-// TAG SELECTION
-// ===========================
-function selectType(el) {
-  document.querySelectorAll('#typeTagGroup .tag').forEach(t => t.className = 'tag');
-  const val = el.dataset.val;
-  state.selectedType = val;
-  if (val === 'wertschöpfend') el.classList.add('selected-ws');
-  else if (val === 'nicht wertschöpfend') el.classList.add('selected-nws');
-  else el.classList.add('selected-nnotw');
-}
-
-function selectVerr(el) {
-  document.querySelectorAll('#verrTagGroup .tag').forEach(t => t.className = 'tag');
-  state.selectedVerr = el.dataset.val;
-  el.classList.add(el.dataset.val === 'ja' ? 'selected-verr' : 'selected-nverr');
-}
-
-function toggleBeteiligt(el) {
-  const val = el.dataset.val;
-  if (state.currentBeteiligt.includes(val)) {
-    state.currentBeteiligt = state.currentBeteiligt.filter(v => v !== val);
-    el.className = 'tag';
-  } else {
-    state.currentBeteiligt.push(val);
-    el.classList.add('selected-ws');
-  }
-}
-
-// ===========================
-// RECENT CHIPS
-// ===========================
-function renderRecentChips() {
-  const pContainer = document.getElementById('recentPatients');
-  pContainer.innerHTML = '';
-  state.recentPatients.slice(0, 6).forEach(p => {
-    const c = document.createElement('div');
-    c.className = 'chip';
-    c.textContent = p;
-    c.onclick = () => { document.getElementById('patientInput').value = p; };
-    pContainer.appendChild(c);
-  });
-
-  const tContainer = document.getElementById('recentTasks');
-  tContainer.innerHTML = '';
-  state.recentTasks.slice(0, 4).forEach(t => {
-    const c = document.createElement('div');
-    c.className = 'chip';
-    c.textContent = t;
-    c.onclick = () => { document.getElementById('taskSelect').value = t; };
-    tContainer.appendChild(c);
-  });
-}
-
-function addToRecent(arr, val, max) {
-  if (!val) return arr;
-  const filtered = arr.filter(v => v !== val);
-  return [val, ...filtered].slice(0, max);
-}
-
-// ===========================
-// SAVE ENTRY
-// ===========================
-function saveEntry() {
-  const task = document.getElementById('taskSelect').value;
-  const patient = document.getElementById('patientInput').value.trim();
-  const kommentar = document.getElementById('kommentarInput').value.trim();
-
-  if (!task) { showToast('⚠️ Bitte Task auswählen'); return; }
-  if (state.timer.elapsed === 0) return; // nothing to save
-
-  const durationMs = state.timer.elapsed;
-  const durationMin = Math.round(durationMs / 60000 * 10) / 10;
-  const now = new Date();
-
-  const entry = {
-    id: Date.now(),
-    time: now.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' }),
-    timestamp: now.toISOString(),
-    task,
-    patient,
-    taetigkeitstyp: state.selectedType,
-    verrechnung: state.selectedVerr,
-    beteiligt: [...state.currentBeteiligt],
-    kommentar,
-    durationMs,
-    durationMin,
-    observer: state.observer,
-    gembaType: state.type
-  };
-
-  state.entries.unshift(entry);
-  saveEntries();
-
-  // Update recents
-  state.recentPatients = addToRecent(state.recentPatients, patient, 8);
-  state.recentTasks = addToRecent(state.recentTasks, task, 6);
-  buildTaskDropdown();
-  renderRecentChips();
-
-  // Reset form
+function saveEntry(){
+  var task=document.getElementById('tSel').value;
+  if(!task||G.timer.ms===0)return;
+  var now=new Date();
+  G.entries.unshift({id:Date.now(),time:now.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}),ts:now.toISOString(),task:task,pat:document.getElementById('pInput').value.trim(),typ:G.styp,verr:G.sverr,bet:G.sbet.slice(),note:document.getElementById('kom').value.trim(),ms:G.timer.ms,min:Math.round(G.timer.ms/60000*10)/10,obs:G.obs,gtype:G.type});
+  lsSave();
+  var p=document.getElementById('pInput').value.trim();
+  if(p)G.rp=[p].concat(G.rp.filter(function(x){return x!==p;})).slice(0,8);
+  G.rt=[task].concat(G.rt.filter(function(x){return x!==task;})).slice(0,6);
+  buildSel();renderChips();
   resetTimer();
-  document.getElementById('taskSelect').value = '';
-  document.getElementById('patientInput').value = '';
-  document.getElementById('kommentarInput').value = '';
-  document.querySelectorAll('#typeTagGroup .tag, #verrTagGroup .tag, #beteiligtGroup .tag')
-    .forEach(t => t.className = 'tag');
-  state.selectedType = '';
-  state.selectedVerr = '';
-  state.currentBeteiligt = [];
-
-  renderEntries();
-  renderMonitoring();
-  showToast('✅ Eintrag gespeichert');
+  document.getElementById('tSel').value='';document.getElementById('pInput').value='';document.getElementById('kom').value='';
+  document.querySelectorAll('#gTyp .tag,#gVerr .tag,#gBet .tag').forEach(function(t){t.className='tag';});
+  G.styp='';G.sverr='';G.sbet=[];
+  renderEntries();renderMon();
+  toast('✅ Gespeichert');
 }
 
-// ===========================
-// RENDER ENTRIES
-// ===========================
-function renderEntries() {
-  const container = document.getElementById('entryList');
-  document.getElementById('entryCount').textContent = state.entries.length;
-
-  if (state.entries.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="ei">⏱️</div><p>Noch keine Einträge.<br>Starte auf dem Erfassungs-Tab.</p></div>`;
-    return;
-  }
-
-  container.innerHTML = state.entries.map(e => {
-    const barClass = typeBarClass(e.taetigkeitstyp);
-    const tags = buildMiniTags(e);
-    return `
-      <div class="entry-card">
-        <div class="entry-type-bar ${barClass}"></div>
-        <div class="entry-body">
-          <div class="entry-task">${e.task}</div>
-          ${e.patient ? `<div class="entry-patient">👤 ${e.patient}</div>` : ''}
-          <div class="entry-tags">${tags}</div>
-          ${e.kommentar ? `<div class="entry-note">💬 ${e.kommentar}</div>` : ''}
-        </div>
-        <div class="entry-right">
-          <div class="entry-dur">${formatMin(e.durationMin)}</div>
-          <div class="entry-time">${e.time}</div>
-          <button class="entry-del" onclick="deleteEntry(${e.id})">✕</button>
-        </div>
-      </div>`;
+function renderEntries(){
+  document.getElementById('eCnt').textContent=G.entries.length;
+  var c=document.getElementById('eList');
+  if(!G.entries.length){c.innerHTML='<div class="empty"><div class="eico">⏱️</div><p>Noch keine Einträge.</p></div>';return;}
+  c.innerHTML=G.entries.map(function(e){
+    var bar=e.typ==='wertschöpfend'?'bws':e.typ==='nicht wertschöpfend'?'bnws':e.typ==='notwendig nicht wertschöpfend'?'bnn':'bx';
+    var tags='';
+    if(e.typ==='wertschöpfend')tags+='<span class="mt mws">Wertsch.</span>';
+    else if(e.typ==='nicht wertschöpfend')tags+='<span class="mt mnws">Nicht w.</span>';
+    else if(e.typ)tags+='<span class="mt mnn">Notwendig</span>';
+    if(e.verr==='ja')tags+='<span class="mt mv">Verr.</span>';
+    else if(e.verr==='nein')tags+='<span class="mt mnv">Nicht verr.</span>';
+    if(e.bet&&e.bet.length)tags+='<span class="mt" style="background:var(--surface2);color:var(--muted);">'+e.bet.join(', ')+'</span>';
+    return '<div class="ecard"><div class="ebar '+bar+'"></div><div class="ebody"><div class="etask">'+e.task+'</div>'+(e.pat?'<div class="epat">👤 '+e.pat+'</div>':'')+(tags?'<div class="etags">'+tags+'</div>':'')+(e.note?'<div class="enote">💬 '+e.note+'</div>':'')+'</div><div class="er"><div class="edur">'+fmtMin(e.min)+'</div><div class="etime">'+e.time+'</div><button class="edel" onclick="delE('+e.id+')">✕</button></div></div>';
   }).join('');
 }
+function delE(id){G.entries=G.entries.filter(function(e){return e.id!==id;});lsSave();renderEntries();renderMon();}
+function clearAll(){if(!G.entries.length)return;if(!confirm('Alle löschen?'))return;G.entries=[];lsSave();renderEntries();renderMon();}
 
-function typeBarClass(typ) {
-  if (typ === 'wertschöpfend') return 'bar-ws';
-  if (typ === 'nicht wertschöpfend') return 'bar-nws';
-  if (typ === 'notwendig nicht wertschöpfend') return 'bar-nnotw';
-  return 'bar-none';
-}
-
-function buildMiniTags(e) {
-  const tags = [];
-  if (e.taetigkeitstyp === 'wertschöpfend') tags.push('<span class="mini-tag mt-ws">✅ Wertschöpfend</span>');
-  else if (e.taetigkeitstyp === 'nicht wertschöpfend') tags.push('<span class="mini-tag mt-nws">❌ Nicht w.sch.</span>');
-  else if (e.taetigkeitstyp === 'notwendig nicht wertschöpfend') tags.push('<span class="mini-tag mt-nnotw">⚠️ Notwendig</span>');
-  if (e.verrechnung === 'ja') tags.push('<span class="mini-tag mt-verr">💰 Verr.</span>');
-  else if (e.verrechnung === 'nein') tags.push('<span class="mini-tag mt-nverr">— Nicht verr.</span>');
-  if (e.beteiligt && e.beteiligt.length > 0) {
-    tags.push(`<span class="mini-tag" style="background:var(--surface2);color:var(--text-muted);">${e.beteiligt.join(', ')}</span>`);
-  }
-  return tags.join('');
-}
-
-function deleteEntry(id) {
-  state.entries = state.entries.filter(e => e.id !== id);
-  saveEntries();
-  renderEntries();
-  renderMonitoring();
-}
-
-function clearAllEntries() {
-  if (state.entries.length === 0) return;
-  if (!confirm('Alle Einträge dieser Session löschen?')) return;
-  state.entries = [];
-  saveEntries();
-  renderEntries();
-  renderMonitoring();
-}
-
-// ===========================
-// MONITORING
-// ===========================
-function setMonView(view, btn) {
-  state.monView = view;
-  document.querySelectorAll('#monToggle .toggle-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderMonitoring();
-}
-
-function renderMonitoring() {
-  const entries = state.entries;
-
-  // KPIs
-  const totalMs = entries.reduce((s, e) => s + e.durationMs, 0);
-  const wsMs = entries.filter(e => e.taetigkeitstyp === 'wertschöpfend').reduce((s, e) => s + e.durationMs, 0);
-  const verrMs = entries.filter(e => e.verrechnung === 'ja').reduce((s, e) => s + e.durationMs, 0);
-  document.getElementById('kpiTotal').textContent = formatMs(totalMs);
-  document.getElementById('kpiCount').textContent = entries.length;
-  document.getElementById('kpiWS').textContent = totalMs > 0 ? Math.round(wsMs / totalMs * 100) + '%' : '–';
-  document.getElementById('kpiVerr').textContent = totalMs > 0 ? Math.round(verrMs / totalMs * 100) + '%' : '–';
-
-  const container = document.getElementById('monContent');
-  if (entries.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="ei">📊</div><p>Noch keine Daten.</p></div>';
-    return;
-  }
-
-  if (state.monView === 'task') {
-    container.innerHTML = renderBarChart(groupBy(entries, 'task'), totalMs);
-  } else if (state.monView === 'patient') {
-    container.innerHTML = renderBarChart(groupBy(entries, 'patient', '(kein Patient)'), totalMs);
-  } else {
-    container.innerHTML = renderTypeChart(entries, totalMs);
+function setMon(v,btn){G.mon=v;document.querySelectorAll('#mTog .tog').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');renderMon();}
+function renderMon(){
+  var e=G.entries,tot=e.reduce(function(s,x){return s+x.ms;},0);
+  var ws=e.filter(function(x){return x.typ==='wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
+  var vr=e.filter(function(x){return x.verr==='ja';}).reduce(function(s,x){return s+x.ms;},0);
+  document.getElementById('kT').textContent=fmtMs(tot);document.getElementById('kC').textContent=e.length;
+  document.getElementById('kW').textContent=tot>0?Math.round(ws/tot*100)+'%':'–';document.getElementById('kV').textContent=tot>0?Math.round(vr/tot*100)+'%':'–';
+  var bars=document.getElementById('mBars');
+  if(!e.length){bars.innerHTML='<div class="empty" style="padding:20px 0;"><p>Keine Daten</p></div>';return;}
+  if(G.mon==='type'){
+    var types=[{k:'wertschöpfend',l:'Wertschöpfend',c:'fg'},{k:'nicht wertschöpfend',l:'Nicht wertschöpfend',c:'fr'},{k:'notwendig nicht wertschöpfend',l:'Notwendig, n.w.',c:'fgo'},{k:'',l:'Nicht klassifiziert',c:'fg'}];
+    var mx=0;types.forEach(function(t){t.ms=e.filter(function(x){return x.typ===t.k;}).reduce(function(s,x){return s+x.ms;},0);if(t.ms>mx)mx=t.ms;});
+    bars.innerHTML=types.filter(function(t){return t.ms>0;}).map(function(t){return brow(t.l,t.ms,mx,t.c,tot>0?Math.round(t.ms/tot*100)+'%':'-');}).join('');
+  }else{
+    var key=G.mon==='task'?'task':'pat',map={};
+    e.forEach(function(x){var k=x[key]||(key==='pat'?'(kein Patient)':'–');map[k]=(map[k]||0)+x.ms;});
+    var sorted=Object.entries(map).sort(function(a,b){return b[1]-a[1];});
+    var mx2=sorted.length?sorted[0][1]:1;
+    bars.innerHTML=sorted.map(function(item){return brow(item[0],item[1],mx2,'fg',fmtMin(item[1]/60000));}).join('');
   }
 }
+function brow(name,ms,max,cls,lbl){return '<div class="bitem"><div class="bname" title="'+name+'">'+name+'</div><div class="btrack"><div class="bfill '+cls+'" style="width:'+Math.round(ms/max*100)+'%"></div></div><div class="bval">'+lbl+'</div></div>';}
 
-function groupBy(entries, key, fallback = '–') {
-  const map = {};
-  entries.forEach(e => {
-    const k = e[key] || fallback;
-    map[k] = (map[k] || 0) + e.durationMs;
-  });
-  return Object.entries(map).sort((a, b) => b[1] - a[1]);
-}
-
-function renderBarChart(data, totalMs) {
-  if (data.length === 0) return '<p style="color:var(--text-muted);font-size:13px;">Keine Daten</p>';
-  const max = data[0][1];
-  return data.map(([name, ms]) => `
-    <div class="bar-item">
-      <div class="bar-name" title="${name}">${name}</div>
-      <div class="bar-track">
-        <div class="bar-fill fill-accent" style="width:${Math.round(ms/max*100)}%"></div>
-      </div>
-      <div class="bar-val">${formatMin(ms / 60000)}</div>
-    </div>`).join('');
-}
-
-function renderTypeChart(entries, totalMs) {
-  const types = [
-    { key: 'wertschöpfend', label: 'Wertschöpfend', cls: 'fill-ws' },
-    { key: 'nicht wertschöpfend', label: 'Nicht wertschöpfend', cls: 'fill-nws' },
-    { key: 'notwendig nicht wertschöpfend', label: 'Notwendig, n.w.', cls: 'fill-nnotw' },
-    { key: '', label: 'Nicht klassifiziert', cls: 'fill-accent' }
+function buildMonSummary(){
+  var e=G.entries,tot=e.reduce(function(s,x){return s+x.ms;},0);
+  var pct=function(ms){return tot>0?Math.round(ms/tot*100)+'%':'-';};
+  var ws=e.filter(function(x){return x.typ==='wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
+  var nws=e.filter(function(x){return x.typ==='nicht wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
+  var nn=e.filter(function(x){return x.typ==='notwendig nicht wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
+  var vr=e.filter(function(x){return x.verr==='ja';}).reduce(function(s,x){return s+x.ms;},0);
+  var tm={};e.forEach(function(x){tm[x.task]=(tm[x.task]||0)+x.ms;});
+  var pm={};e.forEach(function(x){if(x.pat)pm[x.pat]=(pm[x.pat]||0)+x.ms;});
+  var lines=[
+    ['GEMBA WALK MONITORING-BERICHT','','',''],
+    ['Datum',G.date,'',''],
+    ['Beobachter/in',G.obs,'',''],
+    ['Typ',G.type==='arzt'?'Arzt/Pflege':'Administration','',''],
+    ['Einträge',e.length,'',''],
+    ['Gesamtzeit',fmtMs(tot),'',''],
+    ['','','',''],
+    ['TÄTIGKEITSTYPEN','Dauer','Anteil',''],
+    ['Wertschöpfend',fmtMs(ws),pct(ws),''],
+    ['Nicht wertschöpfend',fmtMs(nws),pct(nws),''],
+    ['Notwendig, nicht wertschöpfend',fmtMs(nn),pct(nn),''],
+    ['','','',''],
+    ['VERRECHNUNG','Dauer','Anteil',''],
+    ['Verrechenbar',fmtMs(vr),pct(vr),''],
+    ['Nicht verrechenbar',fmtMs(tot-vr),pct(tot-vr),''],
+    ['','','',''],
+    ['TASKS NACH ZEITAUFWAND','Dauer','Anteil','']
   ];
-  let html = '';
-  types.forEach(({ key, label, cls }) => {
-    const ms = entries.filter(e => e.taetigkeitstyp === key).reduce((s, e) => s + e.durationMs, 0);
-    if (ms === 0) return;
-    const pct = Math.round(ms / totalMs * 100);
-    html += `
-      <div class="bar-item">
-        <div class="bar-name">${label}</div>
-        <div class="bar-track">
-          <div class="bar-fill ${cls}" style="width:${pct}%"></div>
-        </div>
-        <div class="bar-val">${pct}%</div>
-      </div>`;
-  });
-  return html || '<p style="color:var(--text-muted);font-size:13px;">Keine klassifizierten Einträge</p>';
+  Object.entries(tm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push([x[0],fmtMs(x[1]),pct(x[1]),'']);});
+  lines.push(['','','','']);
+  lines.push(['PATIENTEN NACH ZEITAUFWAND','Dauer','','']);
+  Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push([x[0],fmtMs(x[1]),'','']);});
+  return lines;
 }
 
-// ===========================
-// EXPORT CSV
-// ===========================
-function exportCSV() {
-  if (state.entries.length === 0) { showToast('⚠️ Keine Einträge zum Exportieren'); return; }
-
-  const header = ['Zeit', 'Datum', 'Prozessschritt / Aktivität', 'Patient', 'Gemba-Typ', 'Beobachter',
-    'Tätigkeitstyp', 'Verrechnung', 'Beteiligt', 'Dauer (min)', 'Beobachtung / Kommentar'];
-
-  const rows = [...state.entries].reverse().map(e => [
-    e.time,
-    new Date(e.timestamp).toLocaleDateString('de-CH'),
-    e.task,
-    e.patient || '',
-    e.gembaType === 'arzt' ? 'Arzt/Pflege' : 'Admin',
-    e.observer,
-    e.taetigkeitstyp || '',
-    e.verrechnung || '',
-    (e.beteiligt || []).join('; '),
-    e.durationMin,
-    e.kommentar || ''
-  ]);
-
-  const csv = [header, ...rows].map(r =>
-    r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')
-  ).join('\n');
-
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const dateStr = new Date().toLocaleDateString('de-CH').replace(/\./g, '-');
-  a.href = url;
-  a.download = `GembaWalk_${state.type}_${dateStr}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('✅ CSV exportiert');
+function doExport(){
+  if(!G.entries.length){toast('Keine Einträge');return;}
+  // Sheet 1: Einträge
+  var hdr=['Zeit','Datum','Aktivität','Patient','Gemba-Typ','Beobachter','Tätigkeitstyp','Verrechnung','Beteiligt','Dauer (min)','Kommentar'];
+  var rows=G.entries.slice().reverse().map(function(e){return[e.time,new Date(e.ts).toLocaleDateString('de-CH'),e.task,e.pat||'',e.gtype==='arzt'?'Arzt/Pflege':'Admin',e.obs,e.typ||'',e.verr||'',(e.bet||[]).join('; '),e.min,e.note||''];});
+  var csv1=[hdr].concat(rows).map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');
+  // Sheet 2: Monitoring (appended after separator)
+  var mon=buildMonSummary();
+  var csv2=mon.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');
+  var full=csv1+'\n\n;;MONITORING-AUSWERTUNG;;;;;;;\n'+csv2;
+  var blob=new Blob(['\uFEFF'+full],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='GembaWalk_'+G.date.replace(/\./g,'-')+'.csv';a.click();URL.revokeObjectURL(url);
+  toast('✅ CSV mit Monitoring exportiert');
+}
+function doEmail(){
+  if(!G.entries.length){toast('Keine Einträge');return;}
+  var tot=G.entries.reduce(function(s,e){return s+e.ms;},0);
+  var ws=G.entries.filter(function(e){return e.typ==='wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
+  var nws=G.entries.filter(function(e){return e.typ==='nicht wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
+  var nn=G.entries.filter(function(e){return e.typ==='notwendig nicht wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
+  var vr=G.entries.filter(function(e){return e.verr==='ja';}).reduce(function(s,e){return s+e.ms;},0);
+  var pct=function(ms){return tot>0?Math.round(ms/tot*100)+'%':'-';};
+  var tm={};G.entries.forEach(function(e){tm[e.task]=(tm[e.task]||0)+e.ms;});
+  var pm={};G.entries.forEach(function(e){if(e.pat)pm[e.pat]=(pm[e.pat]||0)+e.ms;});
+  var lines=['Gemba Walk Bericht','==================','Datum: '+G.date,'Beobachter/in: '+G.obs,'Typ: '+(G.type==='arzt'?'Arzt/Pflege':'Administration'),'Eintraege: '+G.entries.length,'Gesamtzeit: '+fmtMs(tot),'','TAETIGKEITSTYPEN','----------------','Wertschoepfend: '+fmtMs(ws)+' ('+pct(ws)+')','Nicht wertschoepfend: '+fmtMs(nws)+' ('+pct(nws)+')','Notwendig: '+fmtMs(nn)+' ('+pct(nn)+')','','VERRECHNUNG','-----------','Verrechenbar: '+fmtMs(vr)+' ('+pct(vr)+')','','TASKS (nach Zeit)','------------------'];
+  Object.entries(tm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push('  '+x[0]+': '+fmtMs(x[1])+' ('+pct(x[1])+')');});
+  lines.push('','PATIENTEN','---------');
+  Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push('  '+x[0]+': '+fmtMs(x[1]));});
+  lines.push('','(CSV-Export mit vollstaendiger Auswertung separat herunterladen)');
+  var subj=encodeURIComponent('Gemba Walk Bericht - '+G.date+' - '+G.obs);
+  var body=encodeURIComponent(lines.join('\n'));
+  window.location.href='mailto:carmen.huber@kispisg.ch?subject='+subj+'&body='+body;
 }
 
-// ===========================
-// TABS
-// ===========================
-function switchTab(idx) {
-  const screens = ['tabErfassung', 'tabEintraege', 'tabMonitoring'];
-  screens.forEach((id, i) => {
-    document.getElementById(id).classList.toggle('active', i === idx);
-    document.getElementById('tab' + i).classList.toggle('active', i === idx);
-  });
-  if (idx === 2) renderMonitoring();
-  if (idx === 1) renderEntries();
+function swTab(i){
+  ['pe','pin','pm'].forEach(function(id,j){document.getElementById(id).className='tpane'+(i===j?' on':'');});
+  for(var j=0;j<3;j++)document.getElementById('n'+j).className='nbtn'+(i===j?' on':'');
+  if(i===1)renderEntries();if(i===2)renderMon();
 }
-
-// ===========================
-// HELPERS
-// ===========================
-function formatMs(ms) {
-  if (ms === 0) return '0m';
-  const h = Math.floor(ms / 3600000);
-  const m = Math.floor((ms % 3600000) / 60000);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
-function formatMin(min) {
-  if (!min || min === 0) return '0m';
-  const h = Math.floor(min / 60);
-  const m = Math.round(min % 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('visible');
-  setTimeout(() => t.classList.remove('visible'), 2200);
-}
-
-// ===========================
-// EMAIL REPORT
-// ===========================
-function sendReportEmail() {
-  if (state.entries.length === 0) { showToast('Keine Eintraege vorhanden'); return; }
-
-  const totalMs = state.entries.reduce(function(s,e){ return s + e.durationMs; }, 0);
-  const wsMs = state.entries.filter(function(e){ return e.taetigkeitstyp === 'wertschoepfend'; }).reduce(function(s,e){ return s + e.durationMs; }, 0);
-  const nwsMs = state.entries.filter(function(e){ return e.taetigkeitstyp === 'nicht wertschoepfend'; }).reduce(function(s,e){ return s + e.durationMs; }, 0);
-  const nnotwMs = state.entries.filter(function(e){ return e.taetigkeitstyp === 'notwendig nicht wertschoepfend'; }).reduce(function(s,e){ return s + e.durationMs; }, 0);
-  const verrMs = state.entries.filter(function(e){ return e.verrechnung === 'ja'; }).reduce(function(s,e){ return s + e.durationMs; }, 0);
-  const pct = function(ms) { return totalMs > 0 ? Math.round(ms / totalMs * 100) + '%' : '-'; };
-
-  var taskMap = {};
-  state.entries.forEach(function(e) { taskMap[e.task] = (taskMap[e.task] || 0) + e.durationMs; });
-  var patMap = {};
-  state.entries.forEach(function(e) { if(e.patient) patMap[e.patient] = (patMap[e.patient] || 0) + e.durationMs; });
-
-  var lines = [
-    'Gemba Walk Bericht',
-    '==================',
-    'Datum: ' + state.sessionDate,
-    'Beobachter/in: ' + state.observer,
-    'Typ: ' + (state.type === 'arzt' ? 'Arzt / Pflege' : 'Administration'),
-    'Eintraege: ' + state.entries.length,
-    'Gesamtzeit: ' + formatMs(totalMs),
-    '',
-    'TAETIGKEITSTYPEN',
-    '----------------',
-    'Wertschoepfend: ' + formatMs(wsMs) + ' (' + pct(wsMs) + ')',
-    'Nicht wertschoepfend: ' + formatMs(nwsMs) + ' (' + pct(nwsMs) + ')',
-    'Notwendig nws: ' + formatMs(nnotwMs) + ' (' + pct(nnotwMs) + ')',
-    '',
-    'VERRECHNUNG',
-    '-----------',
-    'Verrechenbar: ' + formatMs(verrMs) + ' (' + pct(verrMs) + ')',
-    '',
-    'TASKS (nach Zeit)',
-    '-----------------'
-  ];
-
-  Object.entries(taskMap).sort(function(a,b){ return b[1]-a[1]; }).forEach(function(entry) {
-    lines.push('  - ' + entry[0] + ': ' + formatMs(entry[1]) + ' (' + pct(entry[1]) + ')');
-  });
-
-  lines.push('');
-  lines.push('PATIENTEN');
-  lines.push('---------');
-  Object.entries(patMap).sort(function(a,b){ return b[1]-a[1]; }).forEach(function(entry) {
-    lines.push('  - ' + entry[0] + ': ' + formatMs(entry[1]));
-  });
-
-  lines.push('');
-  lines.push('(CSV-Export separat herunterladen)');
-
-  var subject = encodeURIComponent('Gemba Walk Bericht - ' + state.sessionDate + ' - ' + state.observer);
-  var body = encodeURIComponent(lines.join('\n'));
-  window.location.href = 'mailto:carmen.huber@kispisg.ch?subject=' + subject + '&body=' + body;
-  showToast('Mail-App wird geoeffnet...');
-}
+function fmtMs(ms){if(!ms)return'0m';var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'h '+m+'m':m+'m';}
+function fmtMin(min){if(!min||min<0.05)return'0m';var h=Math.floor(min/60),m=Math.round(min%60);return h>0?h+'h '+m+'m':m+'m';}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
 </script>
 </body>
 </html>
