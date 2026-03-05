@@ -577,6 +577,7 @@ function doEmail(){
 function swTab(i){
   ['pe','pin','pm'].forEach(function(id,j){document.getElementById(id).className='tpane'+(i===j?' on':'');});
   for(var j=0;j<3;j++)document.getElementById('n'+j).className='nbtn'+(i===j?' on':'');
+  document.getElementById('n3').className='nbtn'; // Fertig-Button nie aktiv
   if(i===1)renderEntries();if(i===2)renderMon();
 }
 function fmtMs(ms){if(!ms)return'0m';var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'h '+m+'m':m+'m';}
@@ -602,10 +603,12 @@ function gembaFertig(){
   G.entries.unshift(separator);
   lsSave();
   sendToSheets(separator, true);
+  // Sicherstellen dass Screen 2 sichtbar bleibt (nicht endSess!)
+  document.getElementById('s2').classList.remove('off');
+  document.getElementById('s1').classList.add('left');
   renderMon();
   renderEntries();
-  // Bleib auf Screen 2, wechsle zu Monitoring-Tab
-  swTab(2);
+  swTab(2); // zu Monitoring-Tab
   toast('🏁 Gemba beendet — Auswertung bereit!');
 }
 
@@ -636,11 +639,11 @@ function sendToSheets(entry, isSep){
     min: entry.min || 0,
     note: entry.note || ''
   };
-  // Exakt gleiche Methode wie TDC Anmeldung: POST + no-cors + JSON
+  // no-cors blockiert custom headers — daher kein Content-Type
+  // Apps Script liest dann e.postData.contents direkt
   fetch(SHEETS_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
   }).catch(function(e){ console.error('Sheets Fehler:', e); });
 }
