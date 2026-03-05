@@ -591,10 +591,9 @@ function pKanal(el){document.querySelectorAll('#gKanal .tag').forEach(function(t
 // GEMBA FERTIG
 function gembaFertig(){
   if(G.timer.run){stopClean();}
-  // Add a separator entry to mark end of session
   var now=new Date();
   var separator={
-    id:Date.now(), isSeparator:true,
+    id:Date.now(), isSeparator:true, isStart:false,
     time:now.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}),
     ts:now.toISOString(),
     label:'🏁 Gemba beendet — '+G.obs+' — '+now.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}),
@@ -603,9 +602,10 @@ function gembaFertig(){
   G.entries.unshift(separator);
   lsSave();
   sendToSheets(separator, true);
-  renderEntries();
   renderMon();
-  swTab(2); // direkt zu Monitoring
+  renderEntries();
+  // Bleib auf Screen 2, wechsle zu Monitoring-Tab
+  swTab(2);
   toast('🏁 Gemba beendet — Auswertung bereit!');
 }
 
@@ -614,24 +614,35 @@ var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8c-gyWLsty4cUd0sfx4p
 function sendToSheets(entry, isSep){
   if(!SHEETS_URL) return;
   var data = isSep ? {
-    separator:true, isStart:entry.isStart||false,
-    time:entry.time, date:entry.date,
-    observer:entry.obs, gtype:entry.gtype
+    separator: true,
+    isStart: entry.isStart ? true : false,
+    time: entry.time,
+    date: entry.date || G.date,
+    observer: entry.obs,
+    gtype: entry.gtype
   } : {
-    time:entry.time, date:new Date(entry.ts).toLocaleDateString('de-CH'),
-    task:entry.task, patient:entry.pat||'',
-    gtype:entry.gtype==='arzt'?'Arzt/Pflege':'Admin',
-    observer:entry.obs, typ:entry.typ||'',
-    verr:entry.verr||'', bet:(entry.bet||[]).join('; '),
-    komplex:entry.komplex||'', kanal:entry.kanal||'',
-    min:entry.min, note:entry.note||''
+    separator: false,
+    time: entry.time,
+    date: new Date(entry.ts).toLocaleDateString('de-CH'),
+    task: entry.task,
+    patient: entry.pat || '',
+    gtype: entry.gtype === 'arzt' ? 'Arzt/Pflege' : 'Admin',
+    observer: entry.obs,
+    typ: entry.typ || '',
+    verr: entry.verr || '',
+    bet: (entry.bet || []).join('; '),
+    komplex: entry.komplex || '',
+    kanal: entry.kanal || '',
+    min: entry.min || 0,
+    note: entry.note || ''
   };
-  // GET request ist zuverlässiger mit Apps Script (no CORS issues)
-  var params = Object.keys(data).map(function(k){
-    return encodeURIComponent(k)+'='+encodeURIComponent(data[k]);
-  }).join('&');
-  var img = new Image();
-  img.src = SHEETS_URL + '?' + params;
+  // Exakt gleiche Methode wie TDC Anmeldung: POST + no-cors + JSON
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).catch(function(e){ console.error('Sheets Fehler:', e); });
 }
 </script>
 </body>
