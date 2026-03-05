@@ -604,8 +604,9 @@ function gembaFertig(){
   lsSave();
   sendToSheets(separator, true);
   renderEntries();
-  swTab(1);
-  toast('🏁 Gemba als beendet markiert');
+  renderMon();
+  swTab(2); // direkt zu Monitoring
+  toast('🏁 Gemba beendet — Auswertung bereit!');
 }
 
 // GOOGLE SHEETS INTEGRATION
@@ -625,7 +626,12 @@ function sendToSheets(entry, isSep){
     komplex:entry.komplex||'', kanal:entry.kanal||'',
     min:entry.min, note:entry.note||''
   };
-  fetch(SHEETS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(data)}).catch(function(){});
+  // GET request ist zuverlässiger mit Apps Script (no CORS issues)
+  var params = Object.keys(data).map(function(k){
+    return encodeURIComponent(k)+'='+encodeURIComponent(data[k]);
+  }).join('&');
+  var img = new Image();
+  img.src = SHEETS_URL + '?' + params;
 }
 </script>
 </body>
