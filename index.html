@@ -298,10 +298,8 @@ textarea:focus{border-color:var(--green);}
       <div id="mBars"></div>
       <div class="stitle">Export</div>
       <div class="ebox">
-        <div class="einfo">CSV im Screening-Format für Excel &amp; SharePoint.</div>
-        <button class="bexp" onclick="doExport()">📥 CSV + Monitoring herunterladen</button>
-        <button class="bemail" onclick="doEmail()">📧 Bericht an carmen.huber@kispisg.ch</button>
-        <div class="hint"><strong>💡 SharePoint-Tipp</strong>CSV hochladen → Excel öffnen → Pivot-Auswertung.</div>
+        <button class="bexp" onclick="doExport()">📥 CSV herunterladen</button>
+        <button class="bexp" style="background:#27ae60;margin-top:8px;" onclick="neuesGemba()">🚀 Neues Gemba starten</button>
       </div>
     </div>
   </div>
@@ -481,8 +479,26 @@ function delE(id){G.entries=G.entries.filter(function(e){return e.id!==id;});lsS
 function clearAll(){if(!G.entries.length)return;if(!confirm('Alle löschen?'))return;G.entries=[];lsSave();renderEntries();renderMon();}
 
 function setMon(v,btn){G.mon=v;document.querySelectorAll('#mTog .tog').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');renderMon();}
+// Gibt nur Einträge der aktuellen Session zurück (zwischen letztem Start und Fertig)
+function getSessionEntries(){
+  var all=G.entries;
+  // Finde letzten Start-Separator
+  var startIdx=-1;
+  for(var i=0;i<all.length;i++){
+    if(all[i].isSeparator && all[i].isStart){startIdx=i;break;}
+  }
+  // Wenn kein Start gefunden: alle nicht-Separator-Einträge
+  if(startIdx===-1){return all.filter(function(x){return !x.isSeparator;});}
+  // Alles vor dem Start (neuere Einträge stehen oben = kleinerer Index)
+  var session=[];
+  for(var j=0;j<startIdx;j++){
+    if(!all[j].isSeparator)session.push(all[j]);
+  }
+  return session;
+}
+
 function renderMon(){
-  var e=G.entries,tot=e.reduce(function(s,x){return s+x.ms;},0);
+  var e=getSessionEntries(),tot=e.reduce(function(s,x){return s+x.ms;},0);
   var ws=e.filter(function(x){return x.typ==='wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
   var vr=e.filter(function(x){return x.verr==='ja';}).reduce(function(s,x){return s+x.ms;},0);
   document.getElementById('kT').textContent=fmtMs(tot);document.getElementById('kC').textContent=e.length;
@@ -504,7 +520,7 @@ function renderMon(){
 function brow(name,ms,max,cls,lbl){return '<div class="bitem"><div class="bname" title="'+name+'">'+name+'</div><div class="btrack"><div class="bfill '+cls+'" style="width:'+Math.round(ms/max*100)+'%"></div></div><div class="bval">'+lbl+'</div></div>';}
 
 function buildMonSummary(){
-  var e=G.entries,tot=e.reduce(function(s,x){return s+x.ms;},0);
+  var e=getSessionEntries(),tot=e.reduce(function(s,x){return s+x.ms;},0);
   var pct=function(ms){return tot>0?Math.round(ms/tot*100)+'%':'-';};
   var ws=e.filter(function(x){return x.typ==='wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
   var nws=e.filter(function(x){return x.typ==='nicht wertschöpfend';}).reduce(function(s,x){return s+x.ms;},0);
@@ -539,10 +555,11 @@ function buildMonSummary(){
 }
 
 function doExport(){
-  if(!G.entries.length){toast('Keine Einträge');return;}
+  var sessionE=getSessionEntries();
+  if(!sessionE.length){toast('Keine Einträge');return;}
   // Sheet 1: Einträge
   var hdr=['Zeit','Datum','Aktivität','Patient','Gemba-Typ','Beobachter','Tätigkeitstyp','Verrechnung','Beteiligt','Dauer (min)','Kommentar'];
-  var rows=G.entries.slice().reverse().map(function(e){return[e.time,new Date(e.ts).toLocaleDateString('de-CH'),e.task,e.pat||'',e.gtype==='arzt'?'Arzt/Pflege':'Admin',e.obs,e.typ||'',e.verr||'',(e.bet||[]).join('; '),e.min,e.note||''];});
+  var rows=sessionE.slice().reverse().map(function(e){return[e.time,new Date(e.ts).toLocaleDateString('de-CH'),e.task,e.pat||'',e.gtype==='arzt'?'Arzt/Pflege':'Admin',e.obs,e.typ||'',e.verr||'',(e.bet||[]).join('; '),e.min,e.note||''];});
   var csv1=[hdr].concat(rows).map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(';');}).join('\n');
   // Sheet 2: Monitoring (appended after separator)
   var mon=buildMonSummary();
@@ -553,24 +570,16 @@ function doExport(){
   a.href=url;a.download='GembaWalk_'+G.date.replace(/\./g,'-')+'.csv';a.click();URL.revokeObjectURL(url);
   toast('✅ CSV mit Monitoring exportiert');
 }
-function doEmail(){
-  if(!G.entries.length){toast('Keine Einträge');return;}
-  var tot=G.entries.reduce(function(s,e){return s+e.ms;},0);
-  var ws=G.entries.filter(function(e){return e.typ==='wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
-  var nws=G.entries.filter(function(e){return e.typ==='nicht wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
-  var nn=G.entries.filter(function(e){return e.typ==='notwendig nicht wertschöpfend';}).reduce(function(s,e){return s+e.ms;},0);
-  var vr=G.entries.filter(function(e){return e.verr==='ja';}).reduce(function(s,e){return s+e.ms;},0);
-  var pct=function(ms){return tot>0?Math.round(ms/tot*100)+'%':'-';};
-  var tm={};G.entries.forEach(function(e){tm[e.task]=(tm[e.task]||0)+e.ms;});
-  var pm={};G.entries.forEach(function(e){if(e.pat)pm[e.pat]=(pm[e.pat]||0)+e.ms;});
-  var lines=['Gemba Walk Bericht','==================','Datum: '+G.date,'Beobachter/in: '+G.obs,'Typ: '+(G.type==='arzt'?'Arzt/Pflege':'Administration'),'Eintraege: '+G.entries.length,'Gesamtzeit: '+fmtMs(tot),'','TAETIGKEITSTYPEN','----------------','Wertschoepfend: '+fmtMs(ws)+' ('+pct(ws)+')','Nicht wertschoepfend: '+fmtMs(nws)+' ('+pct(nws)+')','Notwendig: '+fmtMs(nn)+' ('+pct(nn)+')','','VERRECHNUNG','-----------','Verrechenbar: '+fmtMs(vr)+' ('+pct(vr)+')','','TASKS (nach Zeit)','------------------'];
-  Object.entries(tm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push('  '+x[0]+': '+fmtMs(x[1])+' ('+pct(x[1])+')');});
-  lines.push('','PATIENTEN','---------');
-  Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).forEach(function(x){lines.push('  '+x[0]+': '+fmtMs(x[1]));});
-  lines.push('','(CSV-Export mit vollstaendiger Auswertung separat herunterladen)');
-  var subj=encodeURIComponent('Gemba Walk Bericht - '+G.date+' - '+G.obs);
-  var body=encodeURIComponent(lines.join('\n'));
-  window.location.href='mailto:carmen.huber@kispisg.ch?subject='+subj+'&body='+body;
+function neuesGemba(){
+  if(!confirm('Neues Gemba starten? Die bisherigen Einträge bleiben gespeichert.'))return;
+  // Timer stoppen falls läuft
+  if(G.timer.run){stopClean();}
+  // Nur session-relevante Felder zurücksetzen, Einträge bleiben in localStorage
+  G.timer={run:false,start:0,acc:0,iv:null};
+  lsSave();
+  // Zurück zur Startseite
+  document.getElementById('s1').classList.remove('left');
+  document.getElementById('s2').classList.add('off');
 }
 
 function swTab(i){
