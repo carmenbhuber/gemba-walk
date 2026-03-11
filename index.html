@@ -278,13 +278,10 @@ var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8c-gyWLsty4cUd0sfx4p
 
 function sendToSheets(data) {
   if (!SHEETS_URL) return;
-  try {
-    var url = SHEETS_URL + '?' + Object.keys(data).map(k =>
-      encodeURIComponent(k) + '=' + encodeURIComponent(data[k] != null ? data[k] : '')
-    ).join('&');
-    // Image ping — zuverlaessiger als fetch fuer Google Apps Script (kein CORS-Problem)
-    new Image().src = url;
-  } catch(e) {}
+  var url = SHEETS_URL + '?' + Object.keys(data).map(k =>
+    encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+  ).join('&');
+  fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => {});
 }
 
 // ════════════════════════════════════
