@@ -278,10 +278,12 @@ var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8c-gyWLsty4cUd0sfx4p
 
 function sendToSheets(data) {
   if (!SHEETS_URL) return;
-  var url = SHEETS_URL + '?' + Object.keys(data).map(k =>
-    encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
-  ).join('&');
-  fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => {});
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(() => {});
 }
 
 // ════════════════════════════════════
@@ -427,7 +429,7 @@ function startGemba() {
   }, 1000);
 
   // Send start marker to Sheets
-  sendToSheets({ separator:1, isStart:1, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
+  sendToSheets({ separator:true, isStart:true, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
 
   show('s-track');
 }
@@ -486,7 +488,7 @@ function saveEntry(endTime) {
 
   // Send to Sheets
   sendToSheets({
-    separator: 0,
+    separator: false,
     time: entry.time,
     date: G.date,
     task: entry.task,
@@ -509,7 +511,7 @@ function finishGemba() {
   if (G.curCat && G.curStart) saveEntry(Date.now());
   clearInterval(G.timerIv);
   clearInterval(G.totalIv);
-  sendToSheets({ separator:1, isStart:0, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
+  sendToSheets({ separator:true, isStart:false, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
   buildSummary();
   show('s-summary');
 }
