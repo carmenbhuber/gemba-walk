@@ -466,52 +466,68 @@ function setCat(btn, catName, grpName) {
   showToast(catName);
 }
 
-function saveEntry(endTime) {
+function buildEntryData(endTime) {
   var dur = Math.round((endTime - G.curStart) / 1000);
   var chips = [...document.querySelectorAll('.chip.on')].map(c => c.textContent);
   var pat = document.getElementById('inp-patient') ? document.getElementById('inp-patient').value.trim() : '';
   var note = document.getElementById('inp-comment').value.trim();
-  var entry = {
-    time: new Date(G.curStart).toTimeString().slice(0,5),
-    ts: G.curStart,
-    task: G.curCat,
-    group: G.curGroup,
-    color: G.curColor,
-    pat: pat,
-    bet: chips,
-    note: note,
-    dur: dur,
-    gtype: G.gtype,
-    obs: G.obs,
-  };
-  G.entries.push(entry);
-
-  // Send to Sheets
-  sendToSheets({
+  return {
+    _chips: chips, _dur: dur, _group: G.curGroup, _color: G.curColor, _ts: G.curStart, _pat: pat,
     separator: false,
-    time: entry.time,
+    time: new Date(G.curStart).toTimeString().slice(0,8),
     date: G.date,
-    task: entry.task,
-    patient: entry.pat || '',
+    task: G.curCat,
+    patient: pat,
     gtype: G.gtype,
     observer: G.obs,
-    typ: '',
-    verr: '',
+    typ: '', verr: '',
     bet: chips.join('; '),
-    komplex: '',
-    kanal: '',
-    min: Math.round(dur/60),
-    note: entry.note || '',
+    komplex: '', kanal: '',
+    min: dur,
+    note: note
+  };
+}
+
+function saveEntryLocal(endTime) {
+  var d = buildEntryData(endTime);
+  G.entries.push({
+    time: d.time, ts: d._ts, task: d.task, group: d._group,
+    color: d._color, pat: d._pat, bet: d._chips, note: d.note,
+    dur: d._dur, gtype: d.gtype, obs: d.observer
   });
+}
+
+function saveEntry(endTime) {
+  var d = buildEntryData(endTime);
+  G.entries.push({
+    time: d.time, ts: d._ts, task: d.task, group: d._group,
+    color: d._color, pat: d._pat, bet: d._chips, note: d.note,
+    dur: d._dur, gtype: d.gtype, obs: d.observer
+  });
+  sendToSheets(d);
 }
 
 function toggleChip(el) { el.classList.toggle('on'); }
 
 function finishGemba() {
-  if (G.curCat && G.curStart) saveEntry(Date.now());
   clearInterval(G.timerIv);
   clearInterval(G.totalIv);
-  sendToSheets({ separator:true, isStart:false, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
+  var endTime = Date.now();
+  var endRow = { separator:true, isStart:false, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype };
+  if (G.curCat && G.curStart) {
+    // Letzten Eintrag senden, danach Separator
+    var lastEntry = buildEntryData(endTime);
+    fetch(SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastEntry)
+    }).catch(()=>{}).finally(function() {
+      sendToSheets(endRow);
+    });
+    saveEntryLocal(endTime);
+  } else {
+    sendToSheets(endRow);
+  }
   buildSummary();
   show('s-summary');
 }
@@ -612,7 +628,7 @@ function fmtTime(s) {
   return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 }
 function nowTime() {
-  return new Date().toTimeString().slice(0,5);
+  return new Date().toTimeString().slice(0,8);
 }
 function showToast(msg) {
   var t = document.getElementById('toast');
