@@ -53,7 +53,7 @@ body{color:var(--text);font-family:'Figtree',sans-serif;font-weight:400;height:1
 .oks-logo h1 span{color:var(--limette)}
 
 /* Type toggle */
-.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px}
+.type-toggle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:520px}
 .type-btn{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
 .type-btn .t-ico{font-size:26px;margin-bottom:6px}
 .type-btn .t-lbl{font-size:14px;font-weight:600;letter-spacing:-.01em}
@@ -62,6 +62,8 @@ body{color:var(--text);font-family:'Figtree',sans-serif;font-weight:400;height:1
 .type-btn.sel-arzt .t-lbl{color:var(--smaragd)}
 .type-btn.sel-admin{border-color:var(--himmel);background:rgba(173,215,201,.12)}
 .type-btn.sel-admin .t-lbl{color:var(--himmel)}
+.type-btn.sel-pflege{border-color:var(--flieder);background:rgba(189,164,200,.15)}
+.type-btn.sel-pflege .t-lbl{color:var(--flieder)}
 
 .setup-form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
 .field-lbl{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
@@ -194,6 +196,11 @@ body{color:var(--text);font-family:'Figtree',sans-serif;font-weight:400;height:1
       <div class="t-lbl">Admin-Gemba</div>
       <div class="t-sub">Sekretariat / Assistenz</div>
     </div>
+    <div class="type-btn" id="btn-pflege" onclick="selectType('pflege')">
+      <div class="t-ico">🩹</div>
+      <div class="t-lbl">Pflege-Gemba</div>
+      <div class="t-sub">Pflege / MPA</div>
+    </div>
   </div>
 
   <div class="setup-form">
@@ -292,6 +299,50 @@ function sendToSheets(data) {
 var ARZT_CHIPS = ['Oberarzt','Assistenzarzt','UA','Pflege','Chirurg','Anästhesie','Patient','Familie','Physio/OT','Extern'];
 var ADMIN_CHIPS = ['Arzt','OKS intern','Therapie','Sozialdienst','Zuweiser','Sek KER','Sek OKS','Patient/Familie','Extern'];
 
+
+var PFLEGE_CHIPS = ['Pflege 2','Arzt','Oberarzt','UA','MPA','Patient','Familie','Extern'];
+
+var PFLEGE_CATS = [
+  { group: 'pg-ueberwachung', label: '👁 Überwachung & Triage', cols: 'col2', items: [
+    { ico:'🚪', name:'Triage & Warten', sub:'Erstkontakt, Wartebereich' },
+    { ico:'📋', name:'Überwachung (nicht mon.)', sub:'WG.00.0020 · pro 15 Min.' },
+    { ico:'🖥️', name:'Überwachung (Monitor)', sub:'WG.00.0040 · ≥10 Min. Monitor' },
+    { ico:'🚨', name:'Schockraum', sub:'WG.00.0050/0060' },
+  ]},
+  { group: 'pg-patient', label: '🤝 Patientenkontakt', cols: 'col2', items: [
+    { ico:'🩹', name:'Patientenbesuch / Pflege', sub:'Besuch, Untersuchung assistieren, Vitalzeichen' },
+    { ico:'👨‍👩‍👧', name:'Besprechung Familie', sub:'Elterngespräch, Aufklärung' },
+    { ico:'🔄', name:'Patientenübergabe', sub:'Übergabe an/von Kollegen' },
+  ]},
+  { group: 'pg-massnahmen', label: '💉 Pflegemassnahmen', cols: 'col2', items: [
+    { ico:'💉', name:'PVK / Gefässzugang', sub:'AK.00.0060' },
+    { ico:'🩸', name:'Blutentnahme / Labor', sub:'AK.00.0010/0020 · Röhrchen schicken' },
+    { ico:'💊', name:'Injektion / Infusion', sub:'AK.00.0050' },
+    { ico:'💊', name:'Medi richten', sub:'Unimod · Medikamente vorbereiten' },
+    { ico:'🩺', name:'Wundversorgung / Verband', sub:'MK.15.0030 / AK.00.0090' },
+    { ico:'❤️', name:'EKG', sub:'TK.00.0010' },
+    { ico:'🚿', name:'Blasenkatheter', sub:'VE.05.0010/0020' },
+    { ico:'🚶', name:'Transport / Begleitung', sub:'WG.00.0070 · pro 1 Min.' },
+  ]},
+  { group: 'pg-koordination', label: '📞 Koordination & Kommunikation', cols: 'col2', items: [
+    { ico:'👨‍⚕️', name:'Besprechung mit Arzt', sub:'Rückfragen, Aufträge, Anordnungen' },
+    { ico:'📞', name:'Tel. intern', sub:'interne Anrufe, OKS-intern' },
+    { ico:'📞', name:'Tel. extern / Fallbearbeitung', sub:'Kinderarzt, Zuweiser, Apotheke' },
+    { ico:'🤝', name:'Rapport / Übergabe intern', sub:'Schichtübergabe, Huddle' },
+    { ico:'📦', name:'Material / Vorbereitung', sub:'rüsten, stellen, aufräumen' },
+  ]},
+  { group: 'pg-doku', label: '📄 Dokumentation', cols: 'col2', items: [
+    { ico:'📄', name:'KISIM Leistungserfassung', sub:'Leistungen erfassen' },
+    { ico:'💻', name:'Unimod Medikamente', sub:'Medikamente im System erfassen' },
+  ]},
+  { group: 'pg-ausbildung', label: '🎓 Ausbildung & Sonstiges', cols: 'col2', items: [
+    { ico:'🎓', name:'Teaching / Ausbildung', sub:'Lernende begleiten' },
+    { ico:'❓', name:'Sonstiges', sub:'' },
+  ]},
+  { group: 'pg-pause', label: '☕ Pause', cols: 'col2', items: [
+    { ico:'🍽️', name:'Pause / Unterbruch', sub:'Essen, WC, Unterbruch' },
+  ]},
+];
 var ARZT_CATS = [
   { group: 'g-patient', label: '🏥 Direkter Patientenkontakt', cols: 'col1', items: [
     { ico:'🏥', name:'Patientenbesuch / Untersuchung', sub:'Anamnese, körperliche Untersuchung' },
@@ -377,8 +428,9 @@ var G = {
 // ════════════════════════════════════
 function selectType(type) {
   G.gtype = type;
-  document.getElementById('btn-arzt').className  = 'type-btn' + (type==='arzt'  ? ' sel-arzt'  : '');
-  document.getElementById('btn-admin').className = 'type-btn' + (type==='admin' ? ' sel-admin' : '');
+  document.getElementById('btn-arzt').className   = 'type-btn' + (type==='arzt'   ? ' sel-arzt'   : '');
+  document.getElementById('btn-admin').className  = 'type-btn' + (type==='admin'  ? ' sel-admin'  : '');
+  document.getElementById('btn-pflege').className = 'type-btn' + (type==='pflege' ? ' sel-pflege' : '');
 }
 
 function startGemba() {
@@ -391,15 +443,16 @@ function startGemba() {
 
   // Setup UI
   var isArzt = G.gtype === 'arzt';
-  document.getElementById('patient-row').style.display = isArzt ? 'block' : 'none';
+  var isPflege = G.gtype === 'pflege';
+  document.getElementById('patient-row').style.display = (isArzt || isPflege) ? 'block' : 'none';
 
   // Chips
-  var chipSrc = isArzt ? ARZT_CHIPS : ADMIN_CHIPS;
+  var chipSrc = isArzt ? ARZT_CHIPS : (isPflege ? PFLEGE_CHIPS : ADMIN_CHIPS);
   var cc = document.getElementById('chips-container');
   cc.innerHTML = chipSrc.map(c => `<div class="chip" onclick="toggleChip(this)">${c}</div>`).join('');
 
   // Categories
-  var cats = isArzt ? ARZT_CATS : ADMIN_CATS;
+  var cats = isArzt ? ARZT_CATS : (isPflege ? PFLEGE_CATS : ADMIN_CATS);
   var html = '';
   cats.forEach(grp => {
     html += `<div class="cat-group ${grp.group}">
@@ -605,7 +658,7 @@ function exportCSV() {
   if (isArzt) header.splice(3,0,'Patient');
   var rows = [header];
   G.entries.forEach(e => {
-    var row = [e.time, G.date, e.task, G.gtype==='arzt'?'Arzt/Pflege':'Admin', Math.round(e.dur/60), e.bet.join('; '), e.note, G.name, G.obs];
+    var row = [e.time, G.date, e.task, G.gtype==='arzt'?'Arzt':gtype==='pflege'?'Pflege':'Admin', Math.round(e.dur/60), e.bet.join('; '), e.note, G.name, G.obs];
     if (isArzt) row.splice(3,0,e.pat||'');
     rows.push(row);
   });
