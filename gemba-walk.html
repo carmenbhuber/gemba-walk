@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gemba Walk · OKS</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --marine:  #2A2641;
+  --flieder: #BDA4C8;
+  --limette: #BED249;
+  --creme:   #EDDFC4;
+  --himmel:  #ADD7C9;
+  --smaragd: #3CAA73;
+  --petrol:  #296273;
+
+  --bg:       #16141f;
+  --surface:  #1f1d2c;
+  --surface2: #27243a;
+  --border:   #332f4a;
+  --text:     #EDDFC4;
+  --muted:    #7a7490;
+
+  /* Arzt-Kategoriefarben */
+  --ca-patient: #3CAA73;
+  --ca-diagn:   #ADD7C9;
+  --ca-doku:    #BDA4C8;
+  --ca-koord:   #BED249;
+  --ca-misc:    #296273;
+  --ca-pause:   #3d3956;
+
+  /* Admin-Kategoriefarben */
+  --cd-termin:  #ADD7C9;
+  --cd-komm:    #BDA4C8;
+  --cd-bericht: #BED249;
+  --cd-admin:   #3CAA73;
+  --cd-pause:   #3d3956;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{color:var(--text);font-family:'Figtree',sans-serif;font-weight:400;height:100dvh;display:flex;flex-direction:column}
+
+.screen{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+.screen.active{display:flex}
+
+/* ════════════════ SCREEN 1 — TYPE + SETUP ════════════════ */
+#s-setup{align-items:center;justify-content:center;padding:28px 24px;gap:20px;overflow-y:auto}
+
+.oks-logo{text-align:center}
+.oks-logo .tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px}
+.oks-logo h1{font-size:30px;font-weight:700;letter-spacing:-.04em;line-height:1.1}
+.oks-logo h1 span{color:var(--limette)}
+
+/* Type toggle */
+.type-toggle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:520px}
+.type-btn{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.type-btn .t-ico{font-size:26px;margin-bottom:6px}
+.type-btn .t-lbl{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.type-btn .t-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.type-btn.sel-arzt{border-color:var(--smaragd);background:rgba(60,170,115,.12)}
+.type-btn.sel-arzt .t-lbl{color:var(--smaragd)}
+.type-btn.sel-admin{border-color:var(--himmel);background:rgba(173,215,201,.12)}
+.type-btn.sel-admin .t-lbl{color:var(--himmel)}
+.type-btn.sel-pflege{border-color:var(--flieder);background:rgba(189,164,200,.15)}
+.type-btn.sel-pflege .t-lbl{color:var(--flieder)}
+
+.setup-form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.field-lbl{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.setup-form input,.setup-form select{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);font-family:'Figtree',sans-serif;outline:none;transition:border-color .2s}
+.setup-form input:focus{border-color:var(--limette)}
+
+.btn-start{width:100%;max-width:360px;background:var(--limette);color:#1a1a1a;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;font-family:'Figtree',sans-serif;letter-spacing:-.01em;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn-start:active{transform:scale(.97);opacity:.9}
+
+/* ════════════════ SCREEN 2 — TRACKING ════════════════ */
+#s-track{overflow:hidden}
+
+.track-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:10px}
+.track-info{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.5}
+.track-info b{color:var(--text)}
+.track-badge{font-size:10px;padding:3px 8px;border-radius:6px;font-family:'DM Mono',monospace;font-weight:500;margin-left:6px}
+.badge-arzt{background:rgba(60,170,115,.2);color:var(--smaragd)}
+.badge-admin{background:rgba(173,215,201,.2);color:var(--himmel)}
+.btn-fertig{background:#8b2020;color:white;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;font-family:'Figtree',sans-serif;cursor:pointer;white-space:nowrap}
+
+.current-box{background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:54px}
+.cur-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;animation:pulse 1.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.cur-name{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.cur-timer{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--limette);flex-shrink:0;letter-spacing:-.02em}
+
+.track-scroll{flex:1;overflow-y:auto;padding:10px 14px 20px;-webkit-overflow-scrolling:touch}
+
+/* Patient row (Arzt only) */
+.patient-row{margin-bottom:12px}
+.patient-row input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);font-family:'Figtree',sans-serif;outline:none;transition:border-color .2s}
+.patient-row input:focus{border-color:var(--smaragd)}
+
+/* Chips */
+.chips-row{margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:5px 11px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Figtree',sans-serif}
+.chip.on{background:var(--limette);border-color:var(--limette);color:#1a1a1a}
+
+/* Comment */
+.comment-row{margin-bottom:12px}
+.comment-row textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--text);font-family:'Figtree',sans-serif;resize:none;height:50px;outline:none;transition:border-color .2s}
+.comment-row textarea:focus{border-color:var(--limette)}
+.comment-row textarea::placeholder{color:var(--muted)}
+
+/* Category groups */
+.cat-group{margin-bottom:14px}
+.cat-glbl{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;padding-left:2px}
+.cat-grid{display:grid;gap:6px}
+.col1{grid-template-columns:1fr}
+.col2{grid-template-columns:1fr 1fr}
+
+.cat-btn{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;font-size:12px;font-weight:500;font-family:'Figtree',sans-serif;color:var(--text);cursor:pointer;text-align:left;transition:transform .1s,border-color .15s,background .15s;display:flex;align-items:flex-start;gap:7px;line-height:1.3}
+.cat-btn .ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.cat-btn .ctxt{flex:1}
+.cat-btn .csub{font-size:10px;color:var(--muted);display:block;font-weight:400;margin-top:1px}
+.cat-btn:active{transform:scale(.97)}
+.cat-btn.active{color:#1a1a1a;font-weight:600;border-color:transparent}
+.cat-btn.active .csub{color:rgba(0,0,0,.55)}
+
+/* Color themes per group */
+.g-patient .cat-btn.active{background:var(--ca-patient)}
+.g-diagn   .cat-btn.active{background:var(--ca-diagn)}
+.g-doku    .cat-btn.active{background:var(--ca-doku)}
+.g-koord   .cat-btn.active{background:var(--ca-koord)}
+.g-misc    .cat-btn.active{background:var(--ca-misc);color:var(--creme)}
+.g-misc    .cat-btn.active .csub{color:rgba(237,223,196,.6)}
+.g-pause   .cat-btn.active{background:var(--ca-pause);color:var(--muted)}
+
+.g-termin  .cat-btn.active{background:var(--cd-termin)}
+.g-komm    .cat-btn.active{background:var(--cd-komm)}
+.g-bericht .cat-btn.active{background:var(--cd-bericht)}
+.g-adm     .cat-btn.active{background:var(--cd-admin)}
+
+/* ════════════════ SCREEN 3 — SUMMARY ════════════════ */
+#s-summary{overflow:hidden}
+.sum-bar{padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.sum-bar h2{font-size:16px;font-weight:700}
+.sum-actions{display:flex;gap:8px}
+.btn-csv{background:var(--limette);color:#1a1a1a;border:none;border-radius:8px;padding:8px 13px;font-size:12px;font-weight:700;font-family:'Figtree',sans-serif;cursor:pointer}
+.btn-neu{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 13px;font-size:12px;font-weight:600;font-family:'Figtree',sans-serif;cursor:pointer}
+
+.sum-scroll{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center}
+.kpi-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--limette);line-height:1}
+.kpi-lbl{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3}
+
+.bars-section{margin-bottom:18px}
+.sum-slbl{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.bar-item{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-name{font-size:11px;width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.bar-track{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-dur{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);width:32px;text-align:right;flex-shrink:0}
+
+.sum-divider{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+.sum-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.log-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.log-tbl th{font-size:9px;font-family:'DM Mono',monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border)}
+.log-tbl td{padding:7px 8px;border-bottom:1px solid #1e1d2a;vertical-align:top;color:var(--text)}
+.log-tbl td.m{color:var(--muted);font-family:'DM Mono',monospace;font-size:10px}
+.ldot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;flex-shrink:0}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--creme);color:#1a1a1a;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SCREEN 1: SETUP ══════════ -->
+<div id="s-setup" class="screen active">
+  <div class="oks-logo">
+    <div class="tag">OKS Kindernotfall</div>
+    <h1>Gemba<br><span>Walk</span></h1>
+  </div>
+
+  <!-- Type selection -->
+  <div class="type-toggle">
+    <div class="type-btn" id="btn-arzt" onclick="selectType('arzt')">
+      <div class="t-ico">🩺</div>
+      <div class="t-lbl">Arzt-Gemba</div>
+      <div class="t-sub">Patientenzeit erfassen</div>
+    </div>
+    <div class="type-btn" id="btn-admin" onclick="selectType('admin')">
+      <div class="t-ico">🗂️</div>
+      <div class="t-lbl">Admin-Gemba</div>
+      <div class="t-sub">Sekretariat / Assistenz</div>
+    </div>
+    <div class="type-btn" id="btn-pflege" onclick="selectType('pflege')">
+      <div class="t-ico">🩹</div>
+      <div class="t-lbl">Pflege-Gemba</div>
+      <div class="t-sub">Pflege / MPA</div>
+    </div>
+  </div>
+
+  <div class="setup-form">
+    <div>
+      <div class="field-lbl">Beobachtete Person</div>
+      <input id="inp-name" type="text" placeholder="Name eingeben…" autocomplete="off">
+    </div>
+    <div>
+      <div class="field-lbl">Datum</div>
+      <input id="inp-date" type="date">
+    </div>
+    <div>
+      <div class="field-lbl">Beobachterin</div>
+      <input id="inp-obs" type="text" placeholder="z.B. Carmen" autocomplete="off">
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startGemba()">🚀 Gemba starten</button>
+</div>
+
+<!-- ══════════ SCREEN 2: TRACKING ══════════ -->
+<div id="s-track" class="screen">
+
+  <div class="track-bar">
+    <div class="track-info">
+      <b id="tb-name">—</b>
+      <span id="tb-badge" class="track-badge"></span><br>
+      <span id="tb-date">—</span> · Total: <b id="tb-total">0:00</b>
+    </div>
+    <button class="btn-fertig" onclick="finishGemba()">🏁 Fertig</button>
+  </div>
+
+  <div class="current-box">
+    <div class="cur-dot" id="cur-dot" style="background:var(--muted)"></div>
+    <div class="cur-name" id="cur-name">Aktivität antippen zum Starten…</div>
+    <div class="cur-timer" id="cur-timer">—</div>
+  </div>
+
+  <div class="track-scroll" id="track-scroll">
+    <!-- Patient input (Arzt only) -->
+    <div class="patient-row" id="patient-row" style="display:none">
+      <div class="field-lbl">Patient</div>
+      <input id="inp-patient" type="text" placeholder="Name oder Kürzel…" autocomplete="off">
+    </div>
+
+    <!-- Beteiligte -->
+    <div class="chips-row">
+      <div class="field-lbl">Beteiligte</div>
+      <div class="chips" id="chips-container"></div>
+    </div>
+
+    <!-- Kommentar -->
+    <div class="comment-row">
+      <div class="field-lbl">Kommentar</div>
+      <textarea id="inp-comment" placeholder="Notiz…"></textarea>
+    </div>
+
+    <!-- Categories injected here -->
+    <div id="cat-container"></div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 3: SUMMARY ══════════ -->
+<div id="s-summary" class="screen">
+  <div class="sum-bar">
+    <h2>Auswertung</h2>
+    <div class="sum-actions">
+      <button class="btn-neu" onclick="neuesGemba()">🚀 Neu</button>
+      <button class="btn-csv" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+  </div>
+  <div class="sum-scroll" id="sum-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════
+// GOOGLE SHEETS
+// ════════════════════════════════════
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8c-gyWLsty4cUd0sfx4prqT1xx71ASRhGSEJADBPNmvWwOCOBuI_SAROBTrIqZFvo/exec';
+
+function sendToSheets(data) {
+  if (!SHEETS_URL) return;
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(() => {});
+}
+
+// ════════════════════════════════════
+// CATEGORIES
+// ════════════════════════════════════
+var ARZT_CHIPS = ['Oberarzt','Assistenzarzt','UA','Pflege','Chirurg','Anästhesie','Patient','Familie','Physio/OT','Extern'];
+var ADMIN_CHIPS = ['Arzt','OKS intern','Therapie','Sozialdienst','Zuweiser','Sek KER','Sek OKS','Patient/Familie','Extern'];
+
+
+var PFLEGE_CHIPS = ['Pflege 2','Arzt','Oberarzt','UA','MPA','Patient','Familie','Extern'];
+
+var PFLEGE_CATS = [
+  { group: 'pg-ueberwachung', label: '👁 Überwachung & Triage', cols: 'col2', items: [
+    { ico:'🚪', name:'Triage & Warten', sub:'Erstkontakt, Wartebereich' },
+    { ico:'📋', name:'Überwachung (nicht mon.)', sub:'WG.00.0020 · pro 15 Min.' },
+    { ico:'🖥️', name:'Überwachung (Monitor)', sub:'WG.00.0040 · ≥10 Min. Monitor' },
+    { ico:'🚨', name:'Schockraum', sub:'WG.00.0050/0060' },
+  ]},
+  { group: 'pg-patient', label: '🤝 Patientenkontakt', cols: 'col2', items: [
+    { ico:'🩹', name:'Patientenbesuch / Pflege', sub:'Besuch, Untersuchung assistieren, Vitalzeichen' },
+    { ico:'👨‍👩‍👧', name:'Besprechung Familie', sub:'Elterngespräch, Aufklärung' },
+    { ico:'🔄', name:'Patientenübergabe', sub:'Übergabe an/von Kollegen' },
+  ]},
+  { group: 'pg-massnahmen', label: '💉 Pflegemassnahmen', cols: 'col2', items: [
+    { ico:'💉', name:'PVK / Gefässzugang', sub:'AK.00.0060' },
+    { ico:'🩸', name:'Blutentnahme / Labor', sub:'AK.00.0010/0020 · Röhrchen schicken' },
+    { ico:'💊', name:'Injektion / Infusion', sub:'AK.00.0050' },
+    { ico:'💊', name:'Medi richten', sub:'Unimod · Medikamente vorbereiten' },
+    { ico:'🩺', name:'Wundversorgung / Verband', sub:'MK.15.0030 / AK.00.0090' },
+    { ico:'❤️', name:'EKG', sub:'TK.00.0010' },
+    { ico:'🚿', name:'Blasenkatheter', sub:'VE.05.0010/0020' },
+    { ico:'🚶', name:'Transport / Begleitung', sub:'WG.00.0070 · pro 1 Min.' },
+  ]},
+  { group: 'pg-koordination', label: '📞 Koordination & Kommunikation', cols: 'col2', items: [
+    { ico:'👨‍⚕️', name:'Besprechung mit Arzt', sub:'Rückfragen, Aufträge, Anordnungen' },
+    { ico:'📞', name:'Tel. intern', sub:'interne Anrufe, OKS-intern' },
+    { ico:'📞', name:'Tel. extern / Fallbearbeitung', sub:'Kinderarzt, Zuweiser, Apotheke' },
+    { ico:'🤝', name:'Rapport / Übergabe intern', sub:'Schichtübergabe, Huddle' },
+    { ico:'📦', name:'Material / Vorbereitung', sub:'rüsten, stellen, aufräumen' },
+  ]},
+  { group: 'pg-doku', label: '📄 Dokumentation', cols: 'col2', items: [
+    { ico:'📄', name:'KISIM Leistungserfassung', sub:'Leistungen erfassen' },
+    { ico:'💻', name:'Unimod Medikamente', sub:'Medikamente im System erfassen' },
+  ]},
+  { group: 'pg-ausbildung', label: '🎓 Ausbildung & Sonstiges', cols: 'col2', items: [
+    { ico:'🎓', name:'Teaching / Ausbildung', sub:'Lernende begleiten' },
+    { ico:'❓', name:'Sonstiges', sub:'' },
+  ]},
+  { group: 'pg-pause', label: '☕ Pause', cols: 'col2', items: [
+    { ico:'🍽️', name:'Pause / Unterbruch', sub:'Essen, WC, Unterbruch' },
+  ]},
+];
+var ARZT_CATS = [
+  { group: 'g-patient', label: '🏥 Direkter Patientenkontakt', cols: 'col1', items: [
+    { ico:'🏥', name:'Patientenbesuch / Untersuchung', sub:'Anamnese, körperliche Untersuchung' },
+    { ico:'💬', name:'Besprechung Patient', sub:'Aufklärung, Rückfragen, Elterngespräch' },
+  ]},
+  { group: 'g-diagn', label: '🔬 Diagnostik & Vorbereitung', cols: 'col2', items: [
+    { ico:'🔬', name:'Labor / Bildgebung', sub:'anmelden, anschauen' },
+    { ico:'🔍', name:'Fallvorbereitung', sub:'Infos suchen, Akten' },
+  ]},
+  { group: 'g-doku', label: '📄 Dokumentation', cols: 'col2', items: [
+    { ico:'📄', name:'KISIM Dokumentation', sub:'Bericht schreiben' },
+    { ico:'📋', name:'Leistungserfassung', sub:'abrechnen' },
+  ]},
+  { group: 'g-koord', label: '🔗 Koordination & Team', cols: 'col2', items: [
+    { ico:'📞', name:'Telefonat intern', sub:'Radiologie, Chirurgie…' },
+    { ico:'🤝', name:'Arztrapport / Übergabe', sub:'Team, Huddle' },
+    { ico:'🎓', name:'Teaching / Supervision', sub:'Weiterbildung' },
+    { ico:'🗂️', name:'Administrative Tätigkeit', sub:'Anmeldung, Formulare' },
+  ]},
+  { group: 'g-misc', label: '📝 Weitere', cols: 'col2', items: [
+    { ico:'💊', name:'Medi-Erfassung', sub:'' },
+    { ico:'📝', name:'Rezept schreiben', sub:'Zeugnis, Dispens' },
+    { ico:'📋', name:'Patientenanmeldung', sub:'Zuweisung' },
+    { ico:'•••', name:'Sonstiges', sub:'' },
+  ]},
+  { group: 'g-pause', label: '⏸ Pause', cols: 'col2', items: [
+    { ico:'🍽️', name:'Essen / Pause', sub:'' },
+    { ico:'🚻', name:'WC / Unterbruch', sub:'' },
+  ]},
+];
+
+var ADMIN_CATS = [
+  { group: 'g-termin', label: '📅 Terminkoordination', cols: 'col1', items: [
+    { ico:'📅', name:'Termin: KER + Patient', sub:'einfacher Termin, eine Stelle' },
+    { ico:'📅', name:'Termin: KER + OKS + Patient', sub:'Koordination mit OKS-interner Stelle' },
+    { ico:'📅', name:'Termin: KER + OKS + Extern + Patient', sub:'Koordination mit externer Stelle' },
+  ]},
+  { group: 'g-komm', label: '💬 Kommunikation & Patientenkontakt', cols: 'col2', items: [
+    { ico:'💬', name:'Kommunikation Arzt ↔ Sek', sub:'Rückfragen, Aufträge' },
+    { ico:'🔁', name:'Recall', sub:'Patienten aufbieten' },
+    { ico:'📧', name:'Mail-Bearbeitung', sub:'Outlook / KISIM-Mails' },
+    { ico:'📞', name:'Tel. mit Patient', sub:'Anfragen, Auskunft' },
+    { ico:'🏥', name:'Tel. intern', sub:'OKS-intern, Abteilungen' },
+  ]},
+  { group: 'g-bericht', label: '📄 Berichte & Diktate', cols: 'col2', items: [
+    { ico:'🎙️', name:'Bericht schreiben', sub:'diktieren, tippen' },
+    { ico:'🔍', name:'Bericht kontrollieren', sub:'Expressdiktate, AA-Berichte' },
+    { ico:'📤', name:'Bericht versenden', sub:'Zuweiser, Versand' },
+    { ico:'📄', name:'Formulare', sub:'ausfüllen, kopieren' },
+  ]},
+  { group: 'g-adm', label: '🗂️ Administration', cols: 'col2', items: [
+    { ico:'🗓️', name:'Planung', sub:'Dienst, PEP, Sprechstunden' },
+    { ico:'📬', name:'Post / Ablage', sub:'sortieren, verteilen' },
+    { ico:'🖨️', name:'Listen & Vorbereitung', sub:'drucken, SMS, Zimmer' },
+  ]},
+  { group: 'g-pause', label: '⏸ Unterbruch / Sonstiges', cols: 'col2', items: [
+    { ico:'⏸', name:'Unterbruch / Warten', sub:'' },
+    { ico:'•••', name:'Sonstiges', sub:'' },
+  ]},
+];
+
+// Color map
+var COLOR_MAP = {
+  'g-patient':'#3CAA73','g-diagn':'#ADD7C9','g-doku':'#BDA4C8',
+  'g-koord':'#BED249','g-misc':'#296273','g-pause':'#3d3956',
+  'g-termin':'#ADD7C9','g-komm':'#BDA4C8','g-bericht':'#BED249',
+  'g-adm':'#3CAA73',
+};
+
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+var G = {
+  gtype: '', name: '', date: '', obs: '',
+  entries: [],
+  curCat: null, curGroup: null, curColor: '#7a7490',
+  curStart: null,
+  timerIv: null, totalIv: null, totalStart: null,
+};
+
+// ════════════════════════════════════
+// SETUP
+// ════════════════════════════════════
+function selectType(type) {
+  G.gtype = type;
+  document.getElementById('btn-arzt').className   = 'type-btn' + (type==='arzt'   ? ' sel-arzt'   : '');
+  document.getElementById('btn-admin').className  = 'type-btn' + (type==='admin'  ? ' sel-admin'  : '');
+  document.getElementById('btn-pflege').className = 'type-btn' + (type==='pflege' ? ' sel-pflege' : '');
+}
+
+function startGemba() {
+  if (!G.gtype) { showToast('Bitte Gemba-Typ wählen'); return; }
+  G.name = document.getElementById('inp-name').value.trim() || 'Person';
+  G.date = document.getElementById('inp-date').value || new Date().toISOString().split('T')[0];
+  G.obs  = document.getElementById('inp-obs').value.trim() || 'Carmen';
+  G.entries = [];
+  G.curCat = null; G.curStart = null;
+
+  // Setup UI
+  var isArzt = G.gtype === 'arzt';
+  var isPflege = G.gtype === 'pflege';
+  document.getElementById('patient-row').style.display = (isArzt || isPflege) ? 'block' : 'none';
+
+  // Chips
+  var chipSrc = isArzt ? ARZT_CHIPS : (isPflege ? PFLEGE_CHIPS : ADMIN_CHIPS);
+  var cc = document.getElementById('chips-container');
+  cc.innerHTML = chipSrc.map(c => `<div class="chip" onclick="toggleChip(this)">${c}</div>`).join('');
+
+  // Categories
+  var cats = isArzt ? ARZT_CATS : (isPflege ? PFLEGE_CATS : ADMIN_CATS);
+  var html = '';
+  cats.forEach(grp => {
+    html += `<div class="cat-group ${grp.group}">
+      <div class="cat-glbl">${grp.label}</div>
+      <div class="cat-grid ${grp.cols}">`;
+    grp.items.forEach(it => {
+      html += `<button class="cat-btn" onclick="setCat(this,'${it.name.replace(/'/g,"\\'")}','${grp.group}')" data-group="${grp.group}">
+        <span class="ico">${it.ico}</span>
+        <span class="ctxt">${it.name}${it.sub ? `<span class="csub">${it.sub}</span>` : ''}</span>
+      </button>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('cat-container').innerHTML = html;
+
+  // Top bar
+  document.getElementById('tb-name').textContent = G.name;
+  document.getElementById('tb-date').textContent = G.date;
+  var badge = document.getElementById('tb-badge');
+  badge.textContent = isArzt ? 'Arzt' : 'Admin';
+  badge.className = 'track-badge ' + (isArzt ? 'badge-arzt' : 'badge-admin');
+
+  // Total timer
+  G.totalStart = Date.now();
+  G.totalIv = setInterval(() => {
+    document.getElementById('tb-total').textContent = fmtTime(Math.floor((Date.now()-G.totalStart)/1000));
+  }, 1000);
+
+  // Send start marker to Sheets
+  sendToSheets({ separator:true, isStart:true, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype });
+
+  show('s-track');
+}
+
+// ════════════════════════════════════
+// TRACKING
+// ════════════════════════════════════
+function setCat(btn, catName, grpName) {
+  var now = Date.now();
+  if (G.curCat && G.curStart) saveEntry(now);
+
+  // Visual
+  document.querySelectorAll('.cat-btn.active').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Clear inputs for new entry
+  document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+  document.getElementById('inp-comment').value = '';
+  if (document.getElementById('inp-patient')) document.getElementById('inp-patient').value = '';
+
+  G.curCat   = catName;
+  G.curGroup = grpName;
+  G.curColor = COLOR_MAP[grpName] || '#888';
+  G.curStart = now;
+
+  document.getElementById('cur-name').textContent = catName;
+  document.getElementById('cur-dot').style.background = G.curColor;
+
+  clearInterval(G.timerIv);
+  G.timerIv = setInterval(() => {
+    document.getElementById('cur-timer').textContent = fmtTime(Math.floor((Date.now()-G.curStart)/1000));
+  }, 1000);
+
+  showToast(catName);
+}
+
+function buildEntryData(endTime) {
+  var dur = Math.round((endTime - G.curStart) / 1000);
+  var chips = [...document.querySelectorAll('.chip.on')].map(c => c.textContent);
+  var pat = document.getElementById('inp-patient') ? document.getElementById('inp-patient').value.trim() : '';
+  var note = document.getElementById('inp-comment').value.trim();
+  return {
+    _chips: chips, _dur: dur, _group: G.curGroup, _color: G.curColor, _ts: G.curStart, _pat: pat,
+    separator: false,
+    time: new Date(G.curStart).toTimeString().slice(0,8),
+    date: G.date,
+    task: G.curCat,
+    patient: pat,
+    gtype: G.gtype,
+    observer: G.obs,
+    typ: '', verr: '',
+    bet: chips.join('; '),
+    komplex: '', kanal: '',
+    min: dur,
+    note: note
+  };
+}
+
+function saveEntryLocal(endTime) {
+  var d = buildEntryData(endTime);
+  G.entries.push({
+    time: d.time, ts: d._ts, task: d.task, group: d._group,
+    color: d._color, pat: d._pat, bet: d._chips, note: d.note,
+    dur: d._dur, gtype: d.gtype, obs: d.observer
+  });
+}
+
+function saveEntry(endTime) {
+  var d = buildEntryData(endTime);
+  G.entries.push({
+    time: d.time, ts: d._ts, task: d.task, group: d._group,
+    color: d._color, pat: d._pat, bet: d._chips, note: d.note,
+    dur: d._dur, gtype: d.gtype, obs: d.observer
+  });
+  sendToSheets(d);
+}
+
+function toggleChip(el) { el.classList.toggle('on'); }
+
+function finishGemba() {
+  clearInterval(G.timerIv);
+  clearInterval(G.totalIv);
+  var endTime = Date.now();
+  var endRow = { separator:true, isStart:false, time:nowTime(), date:G.date, observer:G.obs, gtype:G.gtype };
+  if (G.curCat && G.curStart) {
+    // Letzten Eintrag senden, danach Separator
+    var lastEntry = buildEntryData(endTime);
+    fetch(SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastEntry)
+    }).catch(()=>{}).finally(function() {
+      sendToSheets(endRow);
+    });
+    saveEntryLocal(endTime);
+  } else {
+    sendToSheets(endRow);
+  }
+  buildSummary();
+  show('s-summary');
+}
+
+function neuesGemba() {
+  clearInterval(G.timerIv);
+  clearInterval(G.totalIv);
+  G.gtype=''; G.entries=[];
+  document.getElementById('btn-arzt').className='type-btn';
+  document.getElementById('btn-admin').className='type-btn';
+  show('s-setup');
+}
+
+// ════════════════════════════════════
+// SUMMARY
+// ════════════════════════════════════
+function buildSummary() {
+  var totalDur = G.entries.reduce((a,e) => a+e.dur, 0);
+  var catMap = {};
+  G.entries.forEach(e => {
+    if (!catMap[e.task]) catMap[e.task] = { dur:0, color:e.color };
+    catMap[e.task].dur += e.dur;
+  });
+  var sorted = Object.entries(catMap).sort((a,b) => b[1].dur - a[1].dur);
+  var maxDur = sorted[0]?.[1].dur || 1;
+
+  var html = '';
+
+  // KPIs
+  html += `<div class="kpi-strip">
+    <div class="kpi"><div class="kpi-val">${fmtTime(totalDur)}</div><div class="kpi-lbl">Total Zeit</div></div>
+    <div class="kpi"><div class="kpi-val">${G.entries.length}</div><div class="kpi-lbl">Aktivitäten</div></div>
+    <div class="kpi"><div class="kpi-val">${Math.round(totalDur/60)}m</div><div class="kpi-lbl">Minuten</div></div>
+  </div>`;
+
+  // Bar chart
+  html += `<div class="bars-section"><div class="sum-slbl">Zeit pro Kategorie</div>`;
+  sorted.forEach(([cat, {dur, color}]) => {
+    var pct = Math.round(dur/maxDur*100);
+    html += `<div class="bar-item">
+      <div class="bar-name" title="${cat}">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="bar-dur">${Math.round(dur/60)}m</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Log
+  html += `<div class="sum-divider">Chronologisches Log</div>`;
+  var isArzt = G.gtype === 'arzt';
+  html += `<table class="log-tbl"><thead><tr>
+    <th>Zeit</th><th>Kategorie</th>${isArzt ? '<th>Patient</th>' : ''}<th>Min</th><th>Beteiligte</th><th>Kommentar</th>
+  </tr></thead><tbody>`;
+  G.entries.forEach(e => {
+    html += `<tr>
+      <td class="m">${e.time}</td>
+      <td><span class="ldot" style="background:${e.color}"></span>${e.task}</td>
+      ${isArzt ? `<td class="m">${e.pat||'—'}</td>` : ''}
+      <td class="m">${Math.round(e.dur/60)}</td>
+      <td class="m">${e.bet.join(', ')||'—'}</td>
+      <td class="m">${e.note||'—'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+
+  document.getElementById('sum-content').innerHTML = html;
+}
+
+// ════════════════════════════════════
+// CSV EXPORT
+// ════════════════════════════════════
+function exportCSV() {
+  var isArzt = G.gtype === 'arzt';
+  var header = ['Zeit','Datum','Aktivität','Gemba-Typ','Dauer (min)','Beteiligt','Kommentar','Person','Beobachterin'];
+  if (isArzt) header.splice(3,0,'Patient');
+  var rows = [header];
+  G.entries.forEach(e => {
+    var row = [e.time, G.date, e.task, G.gtype==='arzt'?'Arzt':gtype==='pflege'?'Pflege':'Admin', Math.round(e.dur/60), e.bet.join('; '), e.note, G.name, G.obs];
+    if (isArzt) row.splice(3,0,e.pat||'');
+    rows.push(row);
+  });
+  var csv = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download=`gemba_${G.gtype}_${G.name}_${G.date}.csv`; a.click();
+  showToast('CSV exportiert!');
+}
+
+// ════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function fmtTime(s) {
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+function nowTime() {
+  return new Date().toTimeString().slice(0,8);
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// Init date
+document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
